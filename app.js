@@ -1,10 +1,11 @@
-// Python Quest - Main App Logic with Sound Effects (Simplified Editor)
+// Python Quest - Main App Logic with CodeMirror
 
 let pyodide;
 let currentMission = null;
 let selectedDifficulty = 'easy';
 let selectedTopic = 'basics';
 let soundEnabled = true;
+let codeEditor; // CodeMirror instance
 
 // Sound effects
 const sounds = {
@@ -140,43 +141,34 @@ async function initPyodide() {
     }
 }
 
-// Update line numbers
-function updateLineNumbers() {
-    const editor = document.getElementById('codeEditor');
-    const lineNumbers = document.getElementById('lineNumbers');
-    const lines = editor.value.split('\n').length;
-    
-    let lineNumbersHtml = '';
-    for (let i = 1; i <= lines; i++) {
-        lineNumbersHtml += i + '\n';
-    }
-    lineNumbers.textContent = lineNumbersHtml;
-}
-
-// Setup code editor
+// Setup CodeMirror editor
 function setupCodeEditor() {
-    const editor = document.getElementById('codeEditor');
+    const editorElement = document.getElementById('codeEditor');
     
-    // Update line numbers on input
-    editor.addEventListener('input', updateLineNumbers);
-    
-    // Handle tab key
-    editor.addEventListener('keydown', function(e) {
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = this.selectionStart;
-            const end = this.selectionEnd;
-            const value = this.value;
-            
-            this.value = value.substring(0, start) + '    ' + value.substring(end);
-            this.selectionStart = this.selectionEnd = start + 4;
-            
-            updateLineNumbers();
+    codeEditor = CodeMirror(editorElement, {
+        mode: 'python',
+        theme: 'default',
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        lineWrapping: true,
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        extraKeys: {
+            'Tab': function(cm) {
+                cm.replaceSelection('    ', 'end');
+            },
+            'Ctrl-Enter': function(cm) {
+                runCode();
+            },
+            'Cmd-Enter': function(cm) {
+                runCode();
+            }
         }
     });
     
-    // Initial update
-    updateLineNumbers();
+    console.log('CodeMirror initialized successfully!');
 }
 
 // Display missions based on selected difficulty and topic
@@ -226,18 +218,20 @@ function startMission(mission) {
     document.getElementById('missionObjective').textContent = mission.objective;
     document.getElementById('hintText').textContent = mission.hint;
     
-    // Clear previous code and output
-    document.getElementById('codeEditor').value = mission.starterCode || '';
+    // Set code in CodeMirror
+    codeEditor.setValue(mission.starterCode || '');
+    
+    // Clear previous output
     document.getElementById('output').textContent = '';
     document.getElementById('hintBox').classList.add('hidden');
     document.getElementById('resultBox').classList.add('hidden');
     
-    // Update line numbers
-    updateLineNumbers();
-    
     // Switch screens
     document.getElementById('missionSelect').classList.remove('active');
     document.getElementById('missionScreen').classList.add('active');
+    
+    // Focus editor
+    codeEditor.focus();
     
     // Scroll to top
     window.scrollTo(0, 0);
@@ -252,7 +246,7 @@ async function runCode() {
     
     playSound('click');
     
-    const code = document.getElementById('codeEditor').value;
+    const code = codeEditor.getValue();
     const outputBox = document.getElementById('output');
     const resultBox = document.getElementById('resultBox');
     const resultContent = document.getElementById('resultContent');
@@ -384,10 +378,9 @@ function checkMissionCompletion(code, output) {
 function clearCode() {
     playSound('click');
     if (confirm('Are you sure you want to clear your code?')) {
-        document.getElementById('codeEditor').value = currentMission.starterCode || '';
+        codeEditor.setValue(currentMission.starterCode || '');
         document.getElementById('output').textContent = '';
         document.getElementById('resultBox').classList.add('hidden');
-        updateLineNumbers();
     }
 }
 
@@ -536,12 +529,21 @@ function resetProgress() {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize
-    initPyodide();
-    initSounds();
-    loadProgress();
-    setupCodeEditor();
-    displayMissions();
+    // Wait for CodeMirror to load
+    const initWhenReady = setInterval(() => {
+        if (typeof CodeMirror !== 'undefined') {
+            clearInterval(initWhenReady);
+            
+            // Initialize everything
+            initPyodide();
+            initSounds();
+            loadProgress();
+            setupCodeEditor();
+            displayMissions();
+            
+            console.log('Game initialized successfully!');
+        }
+    }, 100);
     
     // Sound toggle
     document.getElementById('soundToggle').addEventListener('click', toggleSound);
@@ -587,12 +589,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Reset progress button
     document.getElementById('resetProgress').addEventListener('click', resetProgress);
-    
-    // Keyboard shortcut: Ctrl/Cmd + Enter to run code
-    document.getElementById('codeEditor').addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            e.preventDefault();
-            runCode();
-        }
-    });
 });

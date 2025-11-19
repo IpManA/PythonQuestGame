@@ -1,746 +1,614 @@
-// Python Quest - Main Game Logic
-// Maximum dopamine edition! 🎮✨
+// Python Quest - Main App Logic with Sound Effects & Syntax Highlighting
 
-let pyodide = null;
-let currentProfile = null;
+let pyodide;
 let currentMission = null;
-let attemptNumber = 0;
 let selectedDifficulty = 'easy';
+let selectedTopic = 'basics';
+let soundEnabled = true;
 
-// Initialize Pyodide (Python in browser)
+// Sound effects
+const sounds = {
+    success: null,
+    error: null,
+    levelUp: null,
+    click: null,
+    hint: null
+};
+
+// Player progress
+let playerProgress = {
+    level: 1,
+    xp: 0,
+    completedMissions: [],
+    currentStreak: 0
+};
+
+// Load progress from localStorage
+function loadProgress() {
+    const saved = localStorage.getItem('pythonQuestProgress');
+    if (saved) {
+        playerProgress = JSON.parse(saved);
+    }
+    updateStatsDisplay();
+}
+
+// Save progress to localStorage
+function saveProgress() {
+    localStorage.setItem('pythonQuestProgress', JSON.stringify(playerProgress));
+}
+
+// Initialize sound effects
+function initSounds() {
+    sounds.success = document.getElementById('successSound');
+    sounds.error = document.getElementById('errorSound');
+    sounds.levelUp = document.getElementById('levelUpSound');
+    sounds.click = document.getElementById('clickSound');
+    sounds.hint = document.getElementById('hintSound');
+    
+    // Set volume
+    Object.values(sounds).forEach(sound => {
+        if (sound) sound.volume = 0.5;
+    });
+}
+
+// Play sound effect
+function playSound(soundName) {
+    if (!soundEnabled || !sounds[soundName]) return;
+    
+    try {
+        sounds[soundName].currentTime = 0;
+        sounds[soundName].play().catch(e => console.log('Sound play error:', e));
+    } catch (e) {
+        console.log('Sound error:', e);
+    }
+}
+
+// Toggle sound on/off
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    const soundBtn = document.getElementById('soundToggle');
+    const soundStatus = document.getElementById('soundStatus');
+    
+    if (soundEnabled) {
+        soundBtn.classList.remove('muted');
+        soundBtn.innerHTML = '🔊 <span id="soundStatus">ON</span>';
+        playSound('click');
+    } else {
+        soundBtn.classList.add('muted');
+        soundBtn.innerHTML = '🔇 <span id="soundStatus">OFF</span>';
+    }
+}
+
+// Update stats display
+function updateStatsDisplay() {
+    document.getElementById('playerLevel').textContent = playerProgress.level;
+    document.getElementById('playerXP').textContent = playerProgress.xp;
+    document.getElementById('missionsCompleted').textContent = playerProgress.completedMissions.length;
+}
+
+// Calculate XP needed for next level
+function getXPForLevel(level) {
+    return level * 100;
+}
+
+// Add XP and check for level up
+function addXP(amount) {
+    playerProgress.xp += amount;
+    const xpNeeded = getXPForLevel(playerProgress.level);
+    
+    if (playerProgress.xp >= xpNeeded) {
+        playerProgress.level++;
+        playerProgress.xp -= xpNeeded;
+        playSound('levelUp');
+        showLevelUpMessage();
+    }
+    
+    updateStatsDisplay();
+    saveProgress();
+}
+
+// Show level up message
+function showLevelUpMessage() {
+    const resultBox = document.getElementById('resultBox');
+    const resultContent = document.getElementById('resultContent');
+    
+    resultBox.className = 'result-box success pulse';
+    resultContent.innerHTML = `
+        <h2>🎉 LEVEL UP! 🎉</h2>
+        <p style="font-size: 1.5em; margin: 15px 0;">You are now Level ${playerProgress.level}!</p>
+        <p>Keep up the great work, adventurer!</p>
+    `;
+    resultBox.classList.remove('hidden');
+    
+    launchFireworks();
+}
+
+// Initialize Pyodide
 async function initPyodide() {
-    showLoading();
     try {
         pyodide = await loadPyodide({
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
         });
-        console.log("✅ Python engine loaded!");
+        
+        // Hide loading screen
+        setTimeout(() => {
+            document.getElementById('loadingPython').classList.add('hidden');
+        }, 500);
+        
     } catch (error) {
-        console.error("Failed to load Python:", error);
-        alert("Failed to load Python engine. Please refresh the page.");
+        console.error('Error loading Pyodide:', error);
+        document.querySelector('.loading-content p').textContent = 'Error loading Python. Please refresh the page.';
     }
-    hideLoading();
 }
 
-// Initialize game on page load
-window.addEventListener('load', async () => {
-    await initPyodide();
-    loadProfiles();
-    setupParticles();
-});
-
-// ===== PROFILE MANAGEMENT =====
-
-function loadProfiles() {
-    const profileList = document.getElementById('profileList');
-    const profiles = getProfiles();
+// Syntax highlighting with Prism.js
+function updateSyntaxHighlighting() {
+    const editor = document.getElementById('codeEditor');
+    const highlight = document.getElementById('syntaxHighlight');
+    const code = highlight.querySelector('code');
     
-    if (profiles.length === 0) {
-        profileList.innerHTML = '<p class="text-secondary">No heroes yet. Create your first one!</p>';
-        return;
-    }
+    code.textContent = editor.value;
+    Prism.highlightElement(code);
     
-    profileList.innerHTML = profiles.map(profile => `
-        <div class="profile-card" onclick="loadProfile('${profile.name}')">
-            <div class="profile-name">${profile.name}</div>
-            <div class="profile-stats">
-                <span>⭐ Level ${profile.level}</span>
-                <span>🏆 ${profile.missionsCompleted} missions</span>
-            </div>
-        </div>
-    `).join('');
+    updateLineNumbers();
 }
 
-function getProfiles() {
-    const profiles = localStorage.getItem('pythonQuest_profiles');
-    return profiles ? JSON.parse(profiles) : [];
+// Update line numbers
+function updateLineNumbers() {
+    const editor = document.getElementById('codeEditor');
+    const lineNumbers = document.getElementById('lineNumbers');
+    const lines = editor.value.split('\n').length;
+    
+    lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
 }
 
-function saveProfiles(profiles) {
-    localStorage.setItem('pythonQuest_profiles', JSON.stringify(profiles));
-}
-
-function showCreateProfile() {
-    showScreen('createProfileScreen');
-}
-
-function selectDifficulty(difficulty) {
-    selectedDifficulty = difficulty;
-    document.querySelectorAll('.difficulty-btn').forEach(btn => {
-        btn.classList.remove('selected');
+// Setup code editor
+function setupCodeEditor() {
+    const editor = document.getElementById('codeEditor');
+    
+    // Update syntax highlighting on input
+    editor.addEventListener('input', updateSyntaxHighlighting);
+    
+    // Handle tab key
+    editor.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const value = this.value;
+            
+            this.value = value.substring(0, start) + '    ' + value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
+            
+            updateSyntaxHighlighting();
+        }
     });
-    document.querySelector(`[data-difficulty="${difficulty}"]`).classList.add('selected');
+    
+    // Sync scroll between editor and syntax highlighting
+    editor.addEventListener('scroll', function() {
+        const highlight = document.getElementById('syntaxHighlight');
+        highlight.scrollTop = this.scrollTop;
+        highlight.scrollLeft = this.scrollLeft;
+    });
+    
+    // Initial update
+    updateSyntaxHighlighting();
 }
 
-function createProfile() {
-    const name = document.getElementById('heroName').value.trim();
+// Display missions based on selected difficulty and topic
+function displayMissions() {
+    const missionList = document.getElementById('missionList');
+    missionList.innerHTML = '';
     
-    if (!name) {
-        alert('Please enter a hero name!');
-        return;
-    }
-    
-    const profiles = getProfiles();
-    if (profiles.find(p => p.name === name)) {
-        alert('Hero name already exists!');
-        return;
-    }
-    
-    const newProfile = {
-        name: name,
-        level: 1,
-        xp: 0,
-        xpToNextLevel: 100,
-        missionsCompleted: 0,
-        completedMissions: [],
-        difficulty: selectedDifficulty,
-        currentTopic: 'basics',
-        createdAt: new Date().toISOString()
-    };
-    
-    profiles.push(newProfile);
-    saveProfiles(profiles);
-    
-    loadProfile(name);
-    createConfetti();
-}
-
-function loadProfile(name) {
-    const profiles = getProfiles();
-    currentProfile = profiles.find(p => p.name === name);
-    
-    if (!currentProfile) {
-        alert('Profile not found!');
-        return;
-    }
-    
-    updateUI();
-    loadNextMission();
-    showScreen('gameScreen');
-}
-
-function updateUI() {
-    document.getElementById('playerName').textContent = currentProfile.name;
-    document.getElementById('playerLevel').textContent = currentProfile.level;
-    document.getElementById('missionsCompleted').textContent = currentProfile.missionsCompleted;
-    
-    const xpPercent = (currentProfile.xp / currentProfile.xpToNextLevel) * 100;
-    document.getElementById('xpBar').style.width = xpPercent + '%';
-    document.getElementById('xpText').textContent = 
-        `${currentProfile.xp} / ${currentProfile.xpToNextLevel} XP`;
-}
-
-function saveProfile() {
-    const profiles = getProfiles();
-    const index = profiles.findIndex(p => p.name === currentProfile.name);
-    if (index !== -1) {
-        profiles[index] = currentProfile;
-        saveProfiles(profiles);
-    }
-}
-
-function logout() {
-    currentProfile = null;
-    currentMission = null;
-    showScreen('welcomeScreen');
-    loadProfiles();
-}
-
-// ===== MISSION MANAGEMENT =====
-
-function loadNextMission() {
-    const missions = getMissionsByTopic(currentProfile.currentTopic, currentProfile.difficulty);
-    
-    // Find first incomplete mission
-    currentMission = missions.find(m => 
-        !currentProfile.completedMissions.includes(m.id)
+    const filteredMissions = MISSIONS.filter(m => 
+        m.difficulty === selectedDifficulty && m.topic === selectedTopic
     );
     
-    if (!currentMission) {
-        alert('🎉 All missions completed for this topic! Try changing topics or difficulty.');
+    if (filteredMissions.length === 0) {
+        missionList.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No missions available for this combination. Try a different topic!</p>';
         return;
     }
     
-    attemptNumber = 1;
-    displayMission();
+    filteredMissions.forEach(mission => {
+        const isCompleted = playerProgress.completedMissions.includes(mission.id);
+        const card = document.createElement('div');
+        card.className = `mission-card ${isCompleted ? 'completed' : ''}`;
+        card.innerHTML = `
+            <h3>${mission.title}</h3>
+            <p>${mission.description}</p>
+            <div class="mission-badges">
+                <span class="badge difficulty">${mission.difficulty}</span>
+                <span class="badge topic">${mission.topic.replace('_', ' ')}</span>
+                ${isCompleted ? '<span class="badge completed">✓ Completed</span>' : ''}
+            </div>
+        `;
+        card.addEventListener('click', () => {
+            playSound('click');
+            startMission(mission);
+        });
+        missionList.appendChild(card);
+    });
 }
 
-function displayMission() {
-    document.getElementById('missionTitle').textContent = currentMission.title;
-    document.getElementById('missionTopic').textContent = 
-        TOPICS[currentMission.topic].name;
-    document.getElementById('missionDifficulty').textContent = 
-        currentMission.difficulty.toUpperCase();
-    document.getElementById('missionDifficulty').style.borderColor = 
-        getDifficultyColor(currentMission.difficulty);
-    document.getElementById('attemptCounter').textContent = `Attempt #${attemptNumber}`;
-    document.getElementById('missionStory').textContent = currentMission.story;
-    document.getElementById('missionDescription').textContent = currentMission.description;
+// Start a mission
+function startMission(mission) {
+    currentMission = mission;
     
-    // Reset code editor and hints
-    document.getElementById('codeEditor').value = '';
+    // Update mission display
+    document.getElementById('missionTitle').textContent = mission.title;
+    document.getElementById('missionDifficulty').textContent = mission.difficulty.toUpperCase();
+    document.getElementById('missionTopic').textContent = mission.topic.replace('_', ' ').toUpperCase();
+    document.getElementById('missionStory').textContent = mission.story;
+    document.getElementById('missionObjective').textContent = mission.objective;
+    document.getElementById('hintText').textContent = mission.hint;
+    
+    // Clear previous code and output
+    document.getElementById('codeEditor').value = mission.starterCode || '';
+    document.getElementById('output').textContent = '';
     document.getElementById('hintBox').classList.add('hidden');
-    document.getElementById('extraHintBox').classList.add('hidden');
-    document.getElementById('outputSection').classList.add('hidden');
+    document.getElementById('resultBox').classList.add('hidden');
     
-    // Animate mission card
-    const missionCard = document.querySelector('.mission-card');
-    missionCard.style.animation = 'none';
-    setTimeout(() => {
-        missionCard.style.animation = 'slideUp 0.5s ease';
-    }, 10);
+    // Update syntax highlighting
+    updateSyntaxHighlighting();
+    
+    // Switch screens
+    document.getElementById('missionSelect').classList.remove('active');
+    document.getElementById('missionScreen').classList.add('active');
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
 }
 
-function getDifficultyColor(difficulty) {
-    const colors = {
-        easy: '#10b981',
-        medium: '#f59e0b',
-        hard: '#ef4444'
-    };
-    return colors[difficulty] || '#6366f1';
-}
-
-function showHint() {
-    const hintBox = document.getElementById('hintBox');
-    hintBox.textContent = '💡 ' + currentMission.hint;
-    hintBox.classList.remove('hidden');
-    createSparkles(event.target);
-}
-
-function showExtraHint() {
-    const hintBox = document.getElementById('extraHintBox');
-    hintBox.textContent = '💡💡 ' + currentMission.extraHint;
-    hintBox.classList.remove('hidden');
-    createSparkles(event.target);
-}
-
-function clearCode() {
-    document.getElementById('codeEditor').value = '';
-    createSparkles(event.target);
-}
-
-function skipMission() {
-    if (confirm('Skip this mission? You can always come back to it later.')) {
-        loadNextMission();
-    }
-}
-
-// ===== CODE EXECUTION =====
-
+// Run Python code
 async function runCode() {
     if (!pyodide) {
-        alert('Python engine not loaded yet. Please wait a moment and try again.');
+        alert('Python is still loading. Please wait...');
         return;
     }
+    
+    playSound('click');
     
     const code = document.getElementById('codeEditor').value;
-    if (!code.trim()) {
-        alert('Please write some code first!');
-        return;
-    }
+    const outputBox = document.getElementById('output');
+    const resultBox = document.getElementById('resultBox');
+    const resultContent = document.getElementById('resultContent');
     
-    showLoading();
+    // Clear previous output
+    outputBox.textContent = 'Running...\n';
+    resultBox.classList.add('hidden');
     
     try {
-        // Capture output
+        // Redirect stdout
         pyodide.runPython(`
 import sys
-import io
-sys.stdout = io.StringIO()
+from io import StringIO
+sys.stdout = StringIO()
         `);
         
-        // Run user's code
+        // Run user code
         pyodide.runPython(code);
         
         // Get output
         const output = pyodide.runPython('sys.stdout.getvalue()');
+        outputBox.textContent = output || '(No output)';
         
-        // Display output
-        document.getElementById('output').textContent = output || '(no output)';
-        document.getElementById('outputSection').classList.remove('hidden');
-        
-        // Validate against test cases
-        const result = validateSolution(code, output);
-        
-        hideLoading();
-        
-        if (result.success) {
-            handleSuccess(result);
-        } else {
-            handleError(result);
+        // Check if mission is completed
+        if (currentMission && currentMission.tests) {
+            checkMissionCompletion(code, output);
         }
         
     } catch (error) {
-        hideLoading();
-        handleError({
-            success: false,
-            message: 'Your code produced an error.',
-            error: error.toString()
-        });
+        playSound('error');
+        outputBox.textContent = `Error:\n${error.message}`;
+        outputBox.parentElement.classList.add('shake');
+        setTimeout(() => outputBox.parentElement.classList.remove('shake'), 500);
+        
+        resultBox.className = 'result-box error shake';
+        resultContent.innerHTML = `
+            <h3>❌ Error</h3>
+            <p>There's an error in your code. Check the output above for details.</p>
+            <p style="margin-top: 15px;"><strong>Tip:</strong> ${currentMission.hint}</p>
+        `;
+        resultBox.classList.remove('hidden');
     }
 }
 
-function validateSolution(code, output) {
-    const testCases = currentMission.testCases;
+// Check mission completion
+function checkMissionCompletion(code, output) {
+    const resultBox = document.getElementById('resultBox');
+    const resultContent = document.getElementById('resultContent');
+    let allTestsPassed = true;
+    let testResults = [];
     
-    for (const test of testCases) {
-        if (test.type === 'output') {
-            if (!output.includes(test.expected)) {
-                return {
-                    success: false,
-                    message: `Expected output: "${test.expected}", but got: "${output.trim()}"`
-                };
+    for (const test of currentMission.tests) {
+        try {
+            // Run test
+            const testResult = pyodide.runPython(test.code);
+            const passed = test.expected(testResult, output);
+            
+            testResults.push({
+                description: test.description,
+                passed: passed
+            });
+            
+            if (!passed) {
+                allTestsPassed = false;
             }
-        } else if (test.type === 'outputLines') {
-            const lines = output.trim().split('\n').filter(l => l.trim());
-            if (JSON.stringify(lines) !== JSON.stringify(test.expected)) {
-                return {
-                    success: false,
-                    message: `Expected lines: ${test.expected.join(', ')}, but got: ${lines.join(', ')}`
-                };
-            }
-        } else if (test.type === 'contains') {
-            for (const expected of test.expected) {
-                if (!output.includes(expected)) {
-                    return {
-                        success: false,
-                        message: `Output should contain "${expected}"`
-                    };
-                }
-            }
-        } else if (test.type === 'count') {
-            const count = (output.match(new RegExp(test.text, 'g')) || []).length;
-            if (count !== test.expected) {
-                return {
-                    success: false,
-                    message: `Expected "${test.text}" to appear ${test.expected} times, but appeared ${count} times`
-                };
-            }
-        } else if (test.type === 'custom') {
-            if (!test.check(output)) {
-                return {
-                    success: false,
-                    message: 'Solution does not meet the requirements'
-                };
-            }
+        } catch (error) {
+            allTestsPassed = false;
+            testResults.push({
+                description: test.description,
+                passed: false,
+                error: error.message
+            });
         }
     }
     
-    // Calculate XP with first-attempt bonus
-    const baseXP = currentMission.xp;
-    const bonusXP = attemptNumber === 1 ? Math.floor(baseXP * 0.5) : 0;
-    const totalXP = baseXP + bonusXP;
-    
-    return {
-        success: true,
-        message: getRandomSuccessMessage(),
-        xp: totalXP,
-        bonusXP: bonusXP,
-        firstTry: attemptNumber === 1
-    };
-}
-
-function handleSuccess(result) {
-    // Update profile
-    currentProfile.completedMissions.push(currentMission.id);
-    currentProfile.missionsCompleted++;
-    currentProfile.xp += result.xp;
-    
-    // Create success modal content
-    document.getElementById('successMessage').textContent = result.message;
-    
-    let xpText = `+${result.xp} XP`;
-    if (result.bonusXP > 0) {
-        xpText += ` (First Try Bonus: +${result.bonusXP})`;
-    }
-    document.getElementById('xpGain').textContent = xpText;
-    
-    // Achievements
-    let achievements = [];
-    if (result.firstTry) {
-        achievements.push('🎯 First Try Master');
-    }
-    if (currentProfile.missionsCompleted % 5 === 0) {
-        achievements.push('🏆 ' + currentProfile.missionsCompleted + ' Missions Milestone');
-    }
-    
-    document.getElementById('achievementBadges').innerHTML = 
-        achievements.map(a => `<div class="badge">${a}</div>`).join('');
-    
-    // Check for level up
-    if (currentProfile.xp >= currentProfile.xpToNextLevel) {
-        currentProfile.xp -= currentProfile.xpToNextLevel;
-        currentProfile.level++;
-        currentProfile.xpToNextLevel = Math.floor(currentProfile.xpToNextLevel * 1.5);
+    // Display results
+    if (allTestsPassed) {
+        playSound('success');
         
-        // Show level up modal first
-        document.getElementById('newLevel').textContent = currentProfile.level;
-        document.getElementById('levelUpModal').classList.remove('hidden');
-        createConfetti();
-        
-        setTimeout(() => {
-            document.getElementById('levelUpModal').classList.add('hidden');
-            document.getElementById('successModal').classList.remove('hidden');
-            createConfetti();
-        }, 2000);
+        // Mark mission as completed
+        if (!playerProgress.completedMissions.includes(currentMission.id)) {
+            playerProgress.completedMissions.push(currentMission.id);
+            playerProgress.currentStreak++;
+            
+            // Award XP based on difficulty
+            const xpReward = {
+                'easy': 50,
+                'medium': 100,
+                'hard': 200
+            }[currentMission.difficulty];
+            
+            addXP(xpReward);
+            
+            resultBox.className = 'result-box success pulse';
+            resultContent.innerHTML = `
+                <h2>🎉 Mission Complete! 🎉</h2>
+                <p style="font-size: 1.2em; margin: 15px 0;">Excellent work, adventurer!</p>
+                <p><strong>+${xpReward} XP</strong></p>
+                <p style="margin-top: 20px;">${currentMission.successMessage}</p>
+            `;
+            
+            launchConfetti();
+        } else {
+            resultBox.className = 'result-box success';
+            resultContent.innerHTML = `
+                <h3>✅ All Tests Passed!</h3>
+                <p>You've already completed this mission, but great job solving it again!</p>
+            `;
+        }
     } else {
-        document.getElementById('successModal').classList.remove('hidden');
-        createConfetti();
-    }
-    
-    saveProfile();
-    updateUI();
-    createFireworks();
-}
-
-function handleError(result) {
-    attemptNumber++;
-    document.getElementById('attemptCounter').textContent = `Attempt #${attemptNumber}`;
-    
-    document.getElementById('errorMessage').textContent = result.message;
-    
-    if (result.error) {
-        document.getElementById('errorDetails').innerHTML = 
-            `<pre>${result.error}</pre>`;
-    } else {
-        document.getElementById('errorDetails').innerHTML = '';
-    }
-    
-    document.getElementById('errorModal').classList.remove('hidden');
-}
-
-function closeError() {
-    document.getElementById('errorModal').classList.add('hidden');
-}
-
-function giveUpMission() {
-    document.getElementById('errorModal').classList.add('hidden');
-    loadNextMission();
-}
-
-function closeLevelUp() {
-    document.getElementById('levelUpModal').classList.add('hidden');
-}
-
-function nextMission() {
-    document.getElementById('successModal').classList.add('hidden');
-    loadNextMission();
-}
-
-// ===== MENU FUNCTIONS =====
-
-function showMenu() {
-    document.getElementById('menuOverlay').classList.remove('hidden');
-}
-
-function closeMenu() {
-    document.getElementById('menuOverlay').classList.add('hidden');
-}
-
-function showTopics() {
-    const topicsList = document.getElementById('topicsList');
-    topicsList.innerHTML = Object.entries(TOPICS).map(([id, topic]) => {
-        const allMissions = getAllMissionsForTopic(id);
-        const completed = allMissions.filter(m => 
-            currentProfile.completedMissions.includes(m.id)
-        ).length;
-        const completedClass = completed === allMissions.length ? 'completed' : '';
+        playSound('error');
         
-        return `
-            <div class="topic-card ${completedClass}" onclick="selectTopic('${id}')">
-                <div class="topic-icon">${topic.icon}</div>
-                <div class="topic-name">${topic.name}</div>
-                <div class="topic-progress">${completed}/${allMissions.length} missions</div>
-            </div>
+        resultBox.className = 'result-box error shake';
+        let failedTests = testResults.filter(t => !t.passed);
+        resultContent.innerHTML = `
+            <h3>❌ Tests Failed</h3>
+            <p>Your code doesn't quite meet all the requirements yet. Keep trying!</p>
+            <ul style="margin: 15px 0; padding-left: 25px;">
+                ${failedTests.map(t => `<li>${t.description}${t.error ? ': ' + t.error : ''}</li>`).join('')}
+            </ul>
+            <p><strong>Tip:</strong> ${currentMission.hint}</p>
         `;
-    }).join('');
+    }
     
-    closeMenu();
-    showScreen('topicsScreen');
+    resultBox.classList.remove('hidden');
 }
 
-function selectTopic(topicId) {
-    currentProfile.currentTopic = topicId;
-    saveProfile();
-    loadNextMission();
-    returnToGame();
-}
-
-function changeDifficulty() {
-    const newDiff = prompt('Choose difficulty: easy, medium, or hard', currentProfile.difficulty);
-    if (newDiff && ['easy', 'medium', 'hard'].includes(newDiff.toLowerCase())) {
-        currentProfile.difficulty = newDiff.toLowerCase();
-        saveProfile();
-        loadNextMission();
-        closeMenu();
-        alert(`Difficulty changed to ${newDiff.toUpperCase()}!`);
+// Clear code
+function clearCode() {
+    playSound('click');
+    if (confirm('Are you sure you want to clear your code?')) {
+        document.getElementById('codeEditor').value = currentMission.starterCode || '';
+        document.getElementById('output').textContent = '';
+        document.getElementById('resultBox').classList.add('hidden');
+        updateSyntaxHighlighting();
     }
 }
 
-function showProgress() {
-    const progressDetails = document.getElementById('progressDetails');
-    
-    const topicProgress = Object.entries(TOPICS).map(([id, topic]) => {
-        const allMissions = getAllMissionsForTopic(id);
-        const completed = allMissions.filter(m => 
-            currentProfile.completedMissions.includes(m.id)
-        ).length;
-        const percent = Math.floor((completed / allMissions.length) * 100);
-        
-        return `
-            <div class="progress-stat">
-                <div class="progress-stat-label">${topic.icon} ${topic.name}</div>
-                <div class="progress-stat-value">${completed}/${allMissions.length} (${percent}%)</div>
-            </div>
-        `;
-    }).join('');
-    
-    progressDetails.innerHTML = `
-        <div class="progress-stat">
-            <div class="progress-stat-label">⭐ Level</div>
-            <div class="progress-stat-value">${currentProfile.level}</div>
-        </div>
-        <div class="progress-stat">
-            <div class="progress-stat-label">📊 Total XP</div>
-            <div class="progress-stat-value">${currentProfile.xp} / ${currentProfile.xpToNextLevel}</div>
-        </div>
-        <div class="progress-stat">
-            <div class="progress-stat-label">🏆 Missions Completed</div>
-            <div class="progress-stat-value">${currentProfile.missionsCompleted}</div>
-        </div>
-        <div class="progress-stat">
-            <div class="progress-stat-label">🎯 Difficulty</div>
-            <div class="progress-stat-value">${currentProfile.difficulty.toUpperCase()}</div>
-        </div>
-        <h3 style="margin-top: 30px; margin-bottom: 15px;">Topic Progress</h3>
-        ${topicProgress}
-    `;
-    
-    closeMenu();
-    showScreen('progressScreen');
+// Show hint
+function showHint() {
+    playSound('hint');
+    const hintBox = document.getElementById('hintBox');
+    hintBox.classList.toggle('hidden');
 }
 
-function returnToGame() {
-    showScreen('gameScreen');
-}
-
-// ===== SCREEN MANAGEMENT =====
-
-function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
-    });
-    document.getElementById(screenId).classList.add('active');
-}
-
-function showLoading() {
-    document.getElementById('loadingOverlay').classList.remove('hidden');
-}
-
-function hideLoading() {
-    document.getElementById('loadingOverlay').classList.add('hidden');
-}
-
-// ===== VISUAL EFFECTS =====
-
-// Particle system for background effects
-function setupParticles() {
-    const canvas = document.getElementById('particleCanvas');
+// Launch confetti
+function launchConfetti() {
+    const canvas = document.getElementById('confetti');
     const ctx = canvas.getContext('2d');
-    
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
-    window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    });
-}
-
-// Confetti effect
-function createConfetti() {
-    const canvas = document.getElementById('particleCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    const particles = [];
-    const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+    const confetti = [];
+    const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe', '#43e97b', '#ffd89b'];
     
     for (let i = 0; i < 150; i++) {
-        particles.push({
+        confetti.push({
             x: Math.random() * canvas.width,
-            y: -10,
-            vx: (Math.random() - 0.5) * 5,
-            vy: Math.random() * 3 + 2,
+            y: Math.random() * canvas.height - canvas.height,
+            size: Math.random() * 6 + 4,
+            speedY: Math.random() * 3 + 2,
+            speedX: Math.random() * 2 - 1,
             color: colors[Math.floor(Math.random() * colors.length)],
             rotation: Math.random() * 360,
-            rotationSpeed: (Math.random() - 0.5) * 10
+            rotationSpeed: Math.random() * 10 - 5
         });
     }
     
-    function animate() {
+    function drawConfetti() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        particles.forEach((p, index) => {
-            p.y += p.vy;
-            p.x += p.vx;
-            p.rotation += p.rotationSpeed;
-            p.vy += 0.1; // Gravity
-            
+        confetti.forEach((c, index) => {
             ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.rotation * Math.PI / 180);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(-5, -5, 10, 10);
+            ctx.translate(c.x, c.y);
+            ctx.rotate(c.rotation * Math.PI / 180);
+            ctx.fillStyle = c.color;
+            ctx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size);
             ctx.restore();
             
-            if (p.y > canvas.height) {
-                particles.splice(index, 1);
+            c.y += c.speedY;
+            c.x += c.speedX;
+            c.rotation += c.rotationSpeed;
+            
+            if (c.y > canvas.height) {
+                confetti.splice(index, 1);
             }
         });
         
-        if (particles.length > 0) {
-            requestAnimationFrame(animate);
+        if (confetti.length > 0) {
+            requestAnimationFrame(drawConfetti);
+        } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
     }
     
-    animate();
+    drawConfetti();
 }
 
-// Fireworks effect
-function createFireworks() {
-    const canvas = document.getElementById('particleCanvas');
+// Launch fireworks for level up
+function launchFireworks() {
+    const canvas = document.getElementById('confetti');
     const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     
     const particles = [];
-    const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe', '#43e97b', '#ffd89b', '#ff6b6b'];
     
-    for (let i = 0; i < 100; i++) {
-        const angle = (Math.PI * 2 * i) / 100;
-        const velocity = 2 + Math.random() * 3;
-        
-        particles.push({
-            x: centerX,
-            y: centerY,
-            vx: Math.cos(angle) * velocity,
-            vy: Math.sin(angle) * velocity,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            alpha: 1
-        });
+    function createFirework(x, y) {
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        for (let i = 0; i < 50; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 5 + 2;
+            particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 1,
+                color: color,
+                size: Math.random() * 4 + 2
+            });
+        }
     }
+    
+    // Create multiple fireworks
+    setTimeout(() => createFirework(canvas.width * 0.3, canvas.height * 0.3), 0);
+    setTimeout(() => createFirework(canvas.width * 0.7, canvas.height * 0.4), 200);
+    setTimeout(() => createFirework(canvas.width * 0.5, canvas.height * 0.2), 400);
+    setTimeout(() => createFirework(canvas.width * 0.2, canvas.height * 0.5), 600);
+    setTimeout(() => createFirework(canvas.width * 0.8, canvas.height * 0.3), 800);
     
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         particles.forEach((p, index) => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.alpha -= 0.01;
-            
-            ctx.globalAlpha = p.alpha;
+            ctx.save();
+            ctx.globalAlpha = p.life;
             ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-            ctx.fill();
-            
-            if (p.alpha <= 0) {
-                particles.splice(index, 1);
-            }
-        });
-        
-        ctx.globalAlpha = 1;
-        
-        if (particles.length > 0) {
-            requestAnimationFrame(animate);
-        }
-    }
-    
-    animate();
-}
-
-// Sparkle effect on button clicks
-function createSparkles(element) {
-    const rect = element.getBoundingClientRect();
-    const canvas = document.getElementById('particleCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    const particles = [];
-    
-    for (let i = 0; i < 20; i++) {
-        particles.push({
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2,
-            vx: (Math.random() - 0.5) * 5,
-            vy: (Math.random() - 0.5) * 5,
-            alpha: 1,
-            size: Math.random() * 3 + 1
-        });
-    }
-    
-    function animate() {
-        particles.forEach((p, index) => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.alpha -= 0.02;
-            
-            ctx.globalAlpha = p.alpha;
-            ctx.fillStyle = '#f59e0b';
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             ctx.fill();
+            ctx.restore();
             
-            if (p.alpha <= 0) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.1; // Gravity
+            p.life -= 0.01;
+            
+            if (p.life <= 0) {
                 particles.splice(index, 1);
             }
         });
         
-        ctx.globalAlpha = 1;
-        
         if (particles.length > 0) {
             requestAnimationFrame(animate);
+        } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
     }
     
     animate();
 }
 
-// Add CSS for profile card
-const style = document.createElement('style');
-style.textContent = `
-    .profile-card {
-        padding: 20px;
-        background: var(--bg-dark);
-        border: 2px solid var(--border);
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-bottom: 15px;
+// Reset progress
+function resetProgress() {
+    if (confirm('Are you sure you want to reset all your progress? This cannot be undone!')) {
+        playSound('click');
+        playerProgress = {
+            level: 1,
+            xp: 0,
+            completedMissions: [],
+            currentStreak: 0
+        };
+        saveProgress();
+        updateStatsDisplay();
+        displayMissions();
+        alert('Progress reset successfully!');
     }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize
+    initPyodide();
+    initSounds();
+    loadProgress();
+    setupCodeEditor();
+    displayMissions();
     
-    .profile-card:hover {
-        transform: translateY(-3px);
-        border-color: var(--primary);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
+    // Sound toggle
+    document.getElementById('soundToggle').addEventListener('click', toggleSound);
     
-    .profile-name {
-        font-size: 1.3em;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 10px;
-    }
+    // Difficulty selection
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            playSound('click');
+            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedDifficulty = this.dataset.difficulty;
+            displayMissions();
+        });
+    });
     
-    .profile-stats {
-        display: flex;
-        gap: 15px;
-        color: var(--text-secondary);
-    }
+    // Topic selection
+    document.querySelectorAll('.topic-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            playSound('click');
+            document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedTopic = this.dataset.topic;
+            displayMissions();
+        });
+    });
     
-    .text-secondary {
-        color: var(--text-secondary);
-        text-align: center;
-        padding: 20px;
-    }
-`;
-document.head.appendChild(style);
+    // Back to menu
+    document.getElementById('backToMenu').addEventListener('click', () => {
+        playSound('click');
+        document.getElementById('missionScreen').classList.remove('active');
+        document.getElementById('missionSelect').classList.add('active');
+        displayMissions();
+    });
+    
+    // Run code button
+    document.getElementById('runCode').addEventListener('click', runCode);
+    
+    // Clear code button
+    document.getElementById('clearCode').addEventListener('click', clearCode);
+    
+    // Show hint button
+    document.getElementById('showHint').addEventListener('click', showHint);
+    
+    // Reset progress button
+    document.getElementById('resetProgress').addEventListener('click', resetProgress);
+    
+    // Keyboard shortcut: Ctrl/Cmd + Enter to run code
+    document.getElementById('codeEditor').addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            runCode();
+        }
+    });
+});

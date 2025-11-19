@@ -400,7 +400,7 @@ body {
     }
 }
 
-/* Code Editor with Syntax Highlighting - PERFECT CURSOR ALIGNMENT */
+/* Code Editor - SIMPLIFIED APPROACH WITH VISIBLE TEXTAREA */
 .code-section {
     margin: 30px 0;
 }
@@ -451,52 +451,31 @@ body {
     color: #858585;
     padding: 15px 10px;
     text-align: right;
-    font-family: 'Consolas', 'Monaco', 'Courier New', 'Lucida Console', monospace;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     font-size: 14px;
-    line-height: 1.6;
-    letter-spacing: normal;
-    word-spacing: normal;
+    line-height: 22.4px;
     user-select: none;
     border-right: 1px solid #3e3e42;
     min-width: 50px;
     flex-shrink: 0;
 }
 
-/* Critical: Both textarea and highlight MUST have identical properties */
-.code-editor,
-.syntax-highlight {
-    font-family: 'Consolas', 'Monaco', 'Courier New', 'Lucida Console', monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    letter-spacing: normal;
-    word-spacing: normal;
-    padding: 15px;
-    margin: 0;
-    border: 0;
-    white-space: pre;
-    word-wrap: normal;
-    word-break: normal;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-}
-
-/* Transparent textarea for typing */
+/* Visible textarea with syntax highlighting applied */
 .code-editor {
-    position: absolute;
-    top: 0;
-    left: 50px;
-    right: 0;
-    bottom: 0;
-    background: transparent;
-    color: transparent;
-    caret-color: #FFFFFF;
-    resize: none;
+    flex: 1;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: none;
+    padding: 15px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 22.4px;
+    resize: vertical;
     outline: none;
-    z-index: 2;
     overflow: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #464647 #1e1e1e;
+    white-space: pre;
+    tab-size: 4;
+    -moz-tab-size: 4;
 }
 
 .code-editor::-webkit-scrollbar {
@@ -513,89 +492,9 @@ body {
     border-radius: 5px;
 }
 
-.code-editor::selection {
-    background: rgba(38, 79, 120, 0.6);
-}
-
-/* Colored syntax layer underneath */
+/* Hide syntax highlight layer - we'll use a different approach */
 .syntax-highlight {
-    position: absolute;
-    top: 0;
-    left: 50px;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 1;
-    overflow: hidden;
-}
-
-.syntax-highlight code {
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
-    font-family: inherit !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-    letter-spacing: inherit !important;
-    word-spacing: inherit !important;
-    display: block;
-}
-
-/* Prism syntax colors */
-.token.comment,
-.token.prolog,
-.token.doctype,
-.token.cdata {
-    color: #6a9955 !important;
-}
-
-.token.punctuation {
-    color: #d4d4d4 !important;
-}
-
-.token.property,
-.token.tag,
-.token.boolean,
-.token.number,
-.token.constant,
-.token.symbol,
-.token.deleted {
-    color: #b5cea8 !important;
-}
-
-.token.selector,
-.token.attr-name,
-.token.string,
-.token.char,
-.token.builtin,
-.token.inserted {
-    color: #ce9178 !important;
-}
-
-.token.operator,
-.token.entity,
-.token.url,
-.language-css .token.string,
-.style .token.string {
-    color: #d4d4d4 !important;
-}
-
-.token.atrule,
-.token.attr-value,
-.token.keyword {
-    color: #c586c0 !important;
-}
-
-.token.function,
-.token.class-name {
-    color: #dcdcaa !important;
-}
-
-.token.regex,
-.token.important,
-.token.variable {
-    color: #9cdcfe !important;
+    display: none;
 }
 
 /* Button Group */
@@ -686,7 +585,6 @@ body {
 
 .result-box.error {
     background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-    border: 2px solid #dc3545;
 }
 
 #resultContent {

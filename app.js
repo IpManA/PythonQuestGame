@@ -1,4 +1,4 @@
-// Python Quest - Main App Logic with Sound Effects & Syntax Highlighting
+// Python Quest - Main App Logic with Sound Effects (Simplified Editor)
 
 let pyodide;
 let currentMission = null;
@@ -140,24 +140,6 @@ async function initPyodide() {
     }
 }
 
-// Syntax highlighting with Prism.js - FIXED VERSION
-function updateSyntaxHighlighting() {
-    const editor = document.getElementById('codeEditor');
-    const highlight = document.getElementById('syntaxHighlight');
-    const code = highlight.querySelector('code');
-    
-    // Set the code content
-    code.textContent = editor.value;
-    
-    // Apply Prism highlighting
-    if (typeof Prism !== 'undefined') {
-        Prism.highlightElement(code);
-    }
-    
-    // Update line numbers
-    updateLineNumbers();
-}
-
 // Update line numbers
 function updateLineNumbers() {
     const editor = document.getElementById('codeEditor');
@@ -175,12 +157,8 @@ function updateLineNumbers() {
 function setupCodeEditor() {
     const editor = document.getElementById('codeEditor');
     
-    // Update syntax highlighting on input with slight delay for performance
-    let highlightTimeout;
-    editor.addEventListener('input', function() {
-        clearTimeout(highlightTimeout);
-        highlightTimeout = setTimeout(updateSyntaxHighlighting, 50);
-    });
+    // Update line numbers on input
+    editor.addEventListener('input', updateLineNumbers);
     
     // Handle tab key
     editor.addEventListener('keydown', function(e) {
@@ -193,19 +171,12 @@ function setupCodeEditor() {
             this.value = value.substring(0, start) + '    ' + value.substring(end);
             this.selectionStart = this.selectionEnd = start + 4;
             
-            updateSyntaxHighlighting();
+            updateLineNumbers();
         }
     });
     
-    // Sync scroll between editor and syntax highlighting
-    editor.addEventListener('scroll', function() {
-        const highlight = document.getElementById('syntaxHighlight');
-        highlight.scrollTop = this.scrollTop;
-        highlight.scrollLeft = this.scrollLeft;
-    });
-    
     // Initial update
-    updateSyntaxHighlighting();
+    updateLineNumbers();
 }
 
 // Display missions based on selected difficulty and topic
@@ -261,8 +232,8 @@ function startMission(mission) {
     document.getElementById('hintBox').classList.add('hidden');
     document.getElementById('resultBox').classList.add('hidden');
     
-    // Update syntax highlighting
-    updateSyntaxHighlighting();
+    // Update line numbers
+    updateLineNumbers();
     
     // Switch screens
     document.getElementById('missionSelect').classList.remove('active');
@@ -416,7 +387,7 @@ function clearCode() {
         document.getElementById('codeEditor').value = currentMission.starterCode || '';
         document.getElementById('output').textContent = '';
         document.getElementById('resultBox').classList.add('hidden');
-        updateSyntaxHighlighting();
+        updateLineNumbers();
     }
 }
 
@@ -569,16 +540,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initPyodide();
     initSounds();
     loadProgress();
-    
-    // Wait for Prism to load before setting up editor
-    const waitForPrism = setInterval(() => {
-        if (typeof Prism !== 'undefined') {
-            clearInterval(waitForPrism);
-            setupCodeEditor();
-            displayMissions();
-            console.log('Prism loaded and syntax highlighting initialized!');
-        }
-    }, 100);
+    setupCodeEditor();
+    displayMissions();
     
     // Sound toggle
     document.getElementById('soundToggle').addEventListener('click', toggleSound);

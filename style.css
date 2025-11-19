@@ -400,7 +400,7 @@ body {
     }
 }
 
-/* Code Editor with Syntax Highlighting - FIXED VERSION */
+/* Code Editor with Syntax Highlighting - FIXED CURSOR ALIGNMENT */
 .code-section {
     margin: 30px 0;
 }
@@ -449,72 +449,78 @@ body {
 .line-numbers {
     background: #1e1e1e;
     color: #858585;
-    padding: 15px 10px;
+    padding: 15px 10px 15px 10px;
     text-align: right;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     font-size: 14px;
     line-height: 1.6;
     user-select: none;
     border-right: 1px solid #3e3e42;
-    min-width: 45px;
-    position: relative;
-    z-index: 1;
+    min-width: 50px;
+    width: 50px;
 }
 
-/* This is the key fix - make textarea transparent with proper layering */
+/* Textarea - transparent with proper alignment */
 .code-editor {
     position: absolute;
     top: 0;
-    left: 45px;
+    left: 50px;
     right: 0;
     bottom: 0;
-    width: calc(100% - 45px);
     background: transparent;
     color: transparent;
     caret-color: #FFFFFF;
     border: none;
     padding: 15px;
+    margin: 0;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     font-size: 14px;
     line-height: 1.6;
     resize: vertical;
     outline: none;
-    z-index: 3;
+    z-index: 2;
+    overflow: auto;
     white-space: pre;
+    word-wrap: normal;
     overflow-wrap: normal;
-    overflow-x: auto;
 }
 
 .code-editor::selection {
     background: rgba(38, 79, 120, 0.6);
+    color: transparent;
 }
 
-/* Syntax highlighted code layer underneath */
+/* Syntax highlighted code - must match textarea exactly */
 .syntax-highlight {
     position: absolute;
     top: 0;
-    left: 45px;
+    left: 50px;
     right: 0;
+    bottom: 0;
     padding: 15px;
     margin: 0;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     font-size: 14px;
     line-height: 1.6;
     pointer-events: none;
+    z-index: 1;
+    overflow: auto;
     white-space: pre;
+    word-wrap: normal;
     overflow-wrap: normal;
-    z-index: 2;
-    background: transparent;
-    overflow-x: auto;
 }
 
 .syntax-highlight code {
     background: transparent !important;
     padding: 0 !important;
+    margin: 0 !important;
     font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    display: block;
 }
 
-/* Prism theme customization for better visibility */
+/* Prism theme - bright colors for dark background */
 .token.comment,
 .token.prolog,
 .token.doctype,

@@ -400,7 +400,7 @@ body {
     }
 }
 
-/* Code Editor with Syntax Highlighting - FIXED CURSOR ALIGNMENT */
+/* Code Editor with Syntax Highlighting - PERFECT CURSOR ALIGNMENT */
 .code-section {
     margin: 30px 0;
 }
@@ -449,18 +449,39 @@ body {
 .line-numbers {
     background: #1e1e1e;
     color: #858585;
-    padding: 15px 10px 15px 10px;
+    padding: 15px 10px;
     text-align: right;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-family: 'Consolas', 'Monaco', 'Courier New', 'Lucida Console', monospace;
     font-size: 14px;
     line-height: 1.6;
+    letter-spacing: normal;
+    word-spacing: normal;
     user-select: none;
     border-right: 1px solid #3e3e42;
     min-width: 50px;
-    width: 50px;
+    flex-shrink: 0;
 }
 
-/* Textarea - transparent with proper alignment */
+/* Critical: Both textarea and highlight MUST have identical properties */
+.code-editor,
+.syntax-highlight {
+    font-family: 'Consolas', 'Monaco', 'Courier New', 'Lucida Console', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: normal;
+    word-spacing: normal;
+    padding: 15px;
+    margin: 0;
+    border: 0;
+    white-space: pre;
+    word-wrap: normal;
+    word-break: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Transparent textarea for typing */
 .code-editor {
     position: absolute;
     top: 0;
@@ -470,57 +491,58 @@ body {
     background: transparent;
     color: transparent;
     caret-color: #FFFFFF;
-    border: none;
-    padding: 15px;
-    margin: 0;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    resize: vertical;
+    resize: none;
     outline: none;
     z-index: 2;
     overflow: auto;
-    white-space: pre;
-    word-wrap: normal;
-    overflow-wrap: normal;
+    scrollbar-width: thin;
+    scrollbar-color: #464647 #1e1e1e;
+}
+
+.code-editor::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.code-editor::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.code-editor::-webkit-scrollbar-thumb {
+    background: #464647;
+    border-radius: 5px;
 }
 
 .code-editor::selection {
     background: rgba(38, 79, 120, 0.6);
-    color: transparent;
 }
 
-/* Syntax highlighted code - must match textarea exactly */
+/* Colored syntax layer underneath */
 .syntax-highlight {
     position: absolute;
     top: 0;
     left: 50px;
     right: 0;
     bottom: 0;
-    padding: 15px;
-    margin: 0;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.6;
     pointer-events: none;
     z-index: 1;
-    overflow: auto;
-    white-space: pre;
-    word-wrap: normal;
-    overflow-wrap: normal;
+    overflow: hidden;
 }
 
 .syntax-highlight code {
     background: transparent !important;
     padding: 0 !important;
     margin: 0 !important;
+    border: 0 !important;
     font-family: inherit !important;
     font-size: inherit !important;
     line-height: inherit !important;
+    letter-spacing: inherit !important;
+    word-spacing: inherit !important;
     display: block;
 }
 
-/* Prism theme - bright colors for dark background */
+/* Prism syntax colors */
 .token.comment,
 .token.prolog,
 .token.doctype,

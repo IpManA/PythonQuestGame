@@ -1,334 +1,451 @@
-// Mission Data for Python Quest
-const MISSIONS = {
-    // ===== BASICS =====
-    basics_easy_1: {
+// Python Quest Missions Database
+
+const MISSIONS = [
+    // ========== BASICS - EASY ==========
+    {
         id: 'basics_easy_1',
-        title: 'The First Spell: Hello World',
-        topic: 'basics',
+        title: '🌟 The First Spell',
         difficulty: 'easy',
-        description: 'Your journey begins! Create a simple program that prints "Hello, Python World!" to the screen.',
-        hint: 'Use the print() function',
-        extraHint: 'Try: print("Hello, Python World!")',
-        example: 'print("Welcome to Python!")',
-        story: 'The ancient Book of Python glows before you. Your first mission is to speak the sacred words...',
-        testCases: [
+        topic: 'basics',
+        description: 'Learn to use the print() function to display messages.',
+        story: 'You arrive at the Python Academy, eager to learn your first spell. The wise instructor tells you: "Every great journey begins with a simple greeting. Let us start by learning to speak to the world!"',
+        objective: 'Write a program that prints "Hello, World!" to the screen.',
+        hint: 'Use the print() function with your message in quotes: print("your message")',
+        starterCode: '# Print "Hello, World!" below\n',
+        tests: [
             {
-                type: 'output',
-                expected: 'Hello, Python World!'
+                description: 'Output contains "Hello, World!"',
+                code: `None`,
+                expected: (result, output) => output.includes('Hello, World!')
             }
         ],
-        xp: 50
+        successMessage: 'Congratulations! You\'ve cast your first Python spell! The print() function is your voice in the Python world.'
     },
-    
-    basics_easy_2: {
+    {
         id: 'basics_easy_2',
-        title: 'The Variable Vault',
-        topic: 'basics',
+        title: '🔢 The Merchant\'s Calculator',
         difficulty: 'easy',
-        description: 'Store the value 42 in a variable called "answer" and print it.',
-        hint: 'Use the = operator to assign values to variables',
-        extraHint: 'Variable assignment: answer = 42, then print(answer)',
-        example: 'name = "Alice"\\nprint(name)',
-        story: 'Variables are the containers of power. Learn to store and retrieve knowledge...',
-        testCases: [
-            { type: 'output', expected: '42' }
+        topic: 'basics',
+        description: 'Create a simple calculator using basic arithmetic.',
+        story: 'A merchant in town needs help calculating his profits. He sold items for 150 gold and 200 gold, but paid 80 gold in expenses. "Can you help me calculate my total profit?" he asks.',
+        objective: 'Create variables for income and expenses, then calculate and print the profit.',
+        hint: 'Create variables like: income = 150 + 200, expenses = 80, then calculate profit = income - expenses',
+        starterCode: '# Calculate the merchant\'s profit\n',
+        tests: [
+            {
+                description: 'Correct profit calculation (270)',
+                code: `None`,
+                expected: (result, output) => output.includes('270')
+            }
         ],
-        xp: 50
+        successMessage: 'Excellent! The merchant is pleased with your mathematical prowess!'
     },
-    
-    basics_easy_3: {
+    {
         id: 'basics_easy_3',
-        title: 'The Calculator Begins',
-        topic: 'basics',
+        title: '📝 The Name Tag Maker',
         difficulty: 'easy',
-        description: 'Create two variables: num1 = 10 and num2 = 5. Print their sum.',
-        hint: 'Use the + operator to add numbers',
-        extraHint: 'result = num1 + num2, then print(result)',
-        example: 'a = 3\\nb = 7\\nprint(a + b)',
-        story: 'Mathematics is the language of the universe. Combine numbers to unlock new powers...',
-        testCases: [
-            { type: 'output', expected: '15' }
+        topic: 'basics',
+        description: 'Learn to work with strings and variables.',
+        story: 'The Academy is hosting a welcome ceremony. Your task is to create name tags for new students. Each tag should say "Welcome, [Name]!"',
+        objective: 'Create a variable called "name" and print a welcome message using it.',
+        hint: 'Use string concatenation or f-strings: print(f"Welcome, {name}!")',
+        starterCode: '# Create a name variable and print a welcome message\nname = "Student"\n',
+        tests: [
+            {
+                description: 'Uses a name variable',
+                code: `'name' in dir()`,
+                expected: (result, output) => result === true
+            },
+            {
+                description: 'Output contains "Welcome"',
+                code: `None`,
+                expected: (result, output) => output.toLowerCase().includes('welcome')
+            }
         ],
-        xp: 60
+        successMessage: 'Perfect! You\'ve learned to work with variables and strings!'
     },
-    
-    basics_medium_1: {
+
+    // ========== BASICS - MEDIUM ==========
+    {
         id: 'basics_medium_1',
-        title: 'The String Manipulator',
-        topic: 'basics',
+        title: '🎲 The Dice Roller',
         difficulty: 'medium',
-        description: 'Create a variable "name" with your name, and print "Hello, [name]! Welcome to Python Quest!"',
-        hint: 'You can concatenate strings with + or use f-strings',
-        extraHint: 'Try: print(f"Hello, {name}! Welcome to Python Quest!")',
-        example: 'greeting = "Hi"\\nname = "Bob"\\nprint(greeting + ", " + name + "!")',
-        story: 'Words have power. Learn to weave them together to create messages...',
-        testCases: [
-            { type: 'contains', expected: ['Hello', 'Welcome to Python Quest'] }
+        topic: 'basics',
+        description: 'Create a program that simulates rolling two dice.',
+        story: 'In the tavern, adventurers are playing a dice game. They need a fair way to roll dice. Can you create a magical dice roller?',
+        objective: 'Import the random module, generate two random numbers between 1-6, and print both rolls and their sum.',
+        hint: 'Use: import random, then random.randint(1, 6) to generate random numbers',
+        starterCode: '# Create a dice roller\n',
+        tests: [
+            {
+                description: 'Output shows two dice rolls',
+                code: `None`,
+                expected: (result, output) => {
+                    const numbers = output.match(/\d+/g);
+                    return numbers && numbers.length >= 2;
+                }
+            }
         ],
-        xp: 80
+        successMessage: 'Amazing! Your dice roller works perfectly! The adventurers are impressed!'
     },
-    
-    basics_medium_2: {
+    {
         id: 'basics_medium_2',
-        title: 'The Simple Calculator',
+        title: '🌡️ Temperature Converter',
+        difficulty: 'medium',
         topic: 'basics',
-        difficulty: 'medium',
-        description: 'Create a simple calculator that takes two numbers (use any values) and prints their sum, difference, product, and quotient.',
-        hint: 'Use +, -, *, and / operators',
-        extraHint: 'Create variables for each operation: sum_result = a + b',
-        example: 'x = 20\\ny = 4\\nprint("Sum:", x + y)',
-        story: 'A true programmer can perform any calculation. Show your mathematical prowess...',
-        testCases: [
-            { type: 'custom', check: (output) => output.toLowerCase().includes('sum') || output.includes('+') }
+        description: 'Convert temperatures between Celsius and Fahrenheit.',
+        story: 'A traveling scholar from distant lands speaks of temperature in Fahrenheit, but your kingdom uses Celsius. Create a converter to bridge this gap!',
+        objective: 'Create a program that converts 100 degrees Fahrenheit to Celsius. Formula: C = (F - 32) * 5/9',
+        hint: 'Use the formula: celsius = (fahrenheit - 32) * 5/9',
+        starterCode: '# Convert 100°F to Celsius\nfahrenheit = 100\n',
+        tests: [
+            {
+                description: 'Correct conversion (~37.78)',
+                code: `None`,
+                expected: (result, output) => {
+                    const match = output.match(/37\.7|38/);
+                    return match !== null;
+                }
+            }
         ],
-        xp: 100
+        successMessage: 'Brilliant! You can now communicate temperatures across different measurement systems!'
     },
-    
-    // ===== LOOPS =====
-    loops_easy_1: {
+
+    // ========== BASICS - HARD ==========
+    {
+        id: 'basics_hard_1',
+        title: '🎯 The Number Guesser',
+        difficulty: 'hard',
+        topic: 'basics',
+        description: 'Create an interactive number guessing game.',
+        story: 'The Oracle has hidden a number between 1 and 10. Create a game where players can guess the number and receive feedback!',
+        objective: 'Generate a random number, compare it with a guess, and provide feedback (higher/lower/correct).',
+        hint: 'Use random.randint(), comparison operators (==, <, >), and conditional statements',
+        starterCode: '# Create a number guessing game\nimport random\n\nsecret_number = random.randint(1, 10)\nguess = 5  # Player\'s guess\n\n# Compare and give feedback\n',
+        tests: [
+            {
+                description: 'Program provides feedback',
+                code: `None`,
+                expected: (result, output) => output.length > 0
+            }
+        ],
+        successMessage: 'Incredible! You\'ve created an interactive game using randomness and logic!'
+    },
+
+    // ========== LOOPS - EASY ==========
+    {
         id: 'loops_easy_1',
-        title: 'The Counting Spell',
-        topic: 'loops',
+        title: '🔄 The Counting Spell',
         difficulty: 'easy',
-        description: 'Use a for loop to print numbers from 1 to 5.',
-        hint: 'Use range() function with for loop',
-        extraHint: 'for i in range(1, 6):\\n    print(i)',
-        example: 'for i in range(3):\\n    print(i)',
-        story: 'Repetition is power. Learn to make the computer count for you...',
-        testCases: [
-            { type: 'outputLines', expected: ['1', '2', '3', '4', '5'] }
+        topic: 'loops',
+        description: 'Learn to use for loops to count.',
+        story: 'To master magic, you must first master counting. The instructor asks you to count from 1 to 5 using a magical loop.',
+        objective: 'Use a for loop with range() to print numbers from 1 to 5.',
+        hint: 'Use: for i in range(1, 6): print(i)',
+        starterCode: '# Count from 1 to 5 using a loop\n',
+        tests: [
+            {
+                description: 'Output contains numbers 1 through 5',
+                code: `None`,
+                expected: (result, output) => {
+                    return ['1', '2', '3', '4', '5'].every(n => output.includes(n));
+                }
+            }
         ],
-        xp: 70
+        successMessage: 'Well done! You\'ve learned the power of loops to repeat actions!'
     },
-    
-    loops_easy_2: {
+    {
         id: 'loops_easy_2',
-        title: 'The Repetition Master',
-        topic: 'loops',
+        title: '⭐ The Star Pattern',
         difficulty: 'easy',
-        description: 'Print "Python is awesome!" 3 times using a loop.',
-        hint: 'Use a for loop with range(3)',
-        extraHint: 'for i in range(3):\\n    print("Python is awesome!")',
-        example: 'for x in range(2):\\n    print("Hello")',
-        story: 'Sometimes the same spell must be cast multiple times. Master repetition...',
-        testCases: [
-            { type: 'count', text: 'Python is awesome!', expected: 3 }
+        topic: 'loops',
+        description: 'Use loops to create patterns.',
+        story: 'The night sky needs decorating! Create a pattern of stars to beautify the celestial canvas.',
+        objective: 'Use a loop to print 5 lines, each containing increasing numbers of stars (*, **, ***, etc.)',
+        hint: 'Use: for i in range(1, 6): print("*" * i)',
+        starterCode: '# Create a star pattern\n',
+        tests: [
+            {
+                description: 'Creates a star pattern',
+                code: `None`,
+                expected: (result, output) => {
+                    return output.includes('*') && output.includes('**') && output.includes('***');
+                }
+            }
         ],
-        xp: 70
+        successMessage: 'Beautiful! Your star pattern illuminates the night sky!'
     },
-    
-    loops_medium_1: {
+
+    // ========== LOOPS - MEDIUM ==========
+    {
         id: 'loops_medium_1',
-        title: 'The Sum Calculator',
-        topic: 'loops',
+        title: '➕ The Sum Calculator',
         difficulty: 'medium',
-        description: 'Calculate and print the sum of all numbers from 1 to 10 using a loop.',
-        hint: 'Create a sum variable, initialize it to 0, then add each number in the loop',
-        extraHint: 'total = 0\\nfor i in range(1, 11):\\n    total += i\\nprint(total)',
-        example: 'result = 0\\nfor n in range(1, 4):\\n    result += n\\nprint(result)',
-        story: 'Great power comes from accumulation. Sum the forces of numbers...',
-        testCases: [
-            { type: 'output', expected: '55' }
+        topic: 'loops',
+        description: 'Calculate the sum of numbers using a loop.',
+        story: 'A treasure chest contains numbered gems from 1 to 10. Calculate the total value of all gems!',
+        objective: 'Use a loop to calculate the sum of all numbers from 1 to 10.',
+        hint: 'Create a variable total = 0, then use a loop: for i in range(1, 11): total += i',
+        starterCode: '# Calculate sum of numbers 1 to 10\n',
+        tests: [
+            {
+                description: 'Calculates correct sum (55)',
+                code: `None`,
+                expected: (result, output) => output.includes('55')
+            }
         ],
-        xp: 100
+        successMessage: 'Excellent calculation! The treasure\'s total value is now known!'
     },
-    
-    loops_medium_2: {
+    {
         id: 'loops_medium_2',
-        title: 'The Even Number Finder',
+        title: '🔢 The Times Table',
+        difficulty: 'medium',
         topic: 'loops',
-        difficulty: 'medium',
-        description: 'Print all even numbers from 2 to 20 using a loop.',
-        hint: 'Use the modulo operator (%) to check if a number is even',
-        extraHint: 'for i in range(1, 21):\\n    if i % 2 == 0:\\n        print(i)',
-        example: 'for num in range(10):\\n    if num % 2 == 0:\\n        print(num)',
-        story: 'Patterns exist everywhere. Learn to find and filter them...',
-        testCases: [
-            { type: 'custom', check: (output) => {
-                const lines = output.split('\\n').filter(l => l.trim());
-                return lines.includes('2') && lines.includes('20') && lines.length >= 10;
-            }}
+        description: 'Generate a multiplication table.',
+        story: 'Young students need to learn their times tables. Create a magical scroll that displays the 5 times table!',
+        objective: 'Use a loop to print the 5 times table from 5x1 to 5x10.',
+        hint: 'Use: for i in range(1, 11): print(f"5 x {i} = {5*i}")',
+        starterCode: '# Create the 5 times table\n',
+        tests: [
+            {
+                description: 'Shows multiplication results',
+                code: `None`,
+                expected: (result, output) => {
+                    return output.includes('5') && output.includes('10') && output.includes('50');
+                }
+            }
         ],
-        xp: 120
+        successMessage: 'Perfect! Your times table will help students for generations!'
     },
-    
-    // ===== FUNCTIONS =====
-    functions_easy_1: {
+
+    // ========== LOOPS - HARD ==========
+    {
+        id: 'loops_hard_1',
+        title: '🎨 The Pattern Master',
+        difficulty: 'hard',
+        topic: 'loops',
+        description: 'Create complex patterns using nested loops.',
+        story: 'The Royal Palace needs decorative patterns for the grand hall. Create a pyramid pattern that impresses the kingdom!',
+        objective: 'Create a pyramid pattern with 5 rows using nested loops.',
+        hint: 'Use nested loops: outer loop for rows, inner loop for stars. Add spaces for centering.',
+        starterCode: '# Create a pyramid pattern\n# Row 1: 1 star\n# Row 2: 2 stars\n# Row 3: 3 stars...\n',
+        tests: [
+            {
+                description: 'Creates a pattern with multiple rows',
+                code: `None`,
+                expected: (result, output) => {
+                    const lines = output.trim().split('\n');
+                    return lines.length >= 3;
+                }
+            }
+        ],
+        successMessage: 'Magnificent! Your pattern is worthy of the Royal Palace!'
+    },
+
+    // ========== FUNCTIONS - EASY ==========
+    {
         id: 'functions_easy_1',
-        title: 'The Greeting Function',
-        topic: 'functions',
+        title: '👋 The Greeting Function',
         difficulty: 'easy',
-        description: 'Create a function called greet() that prints "Hello, World!" when called. Then call it.',
-        hint: 'Use def to define a function',
-        extraHint: 'def greet():\\n    print("Hello, World!")\\ngreet()',
-        example: 'def say_hi():\\n    print("Hi")\\nsay_hi()',
-        story: 'Functions are reusable spells. Create your first magical incantation...',
-        testCases: [
-            { type: 'output', expected: 'Hello, World!' }
+        topic: 'functions',
+        description: 'Create your first function.',
+        story: 'Functions are reusable spells! Learn to create a greeting function that can welcome anyone by name.',
+        objective: 'Create a function called greet() that takes a name parameter and prints a greeting.',
+        hint: 'def greet(name): print(f"Hello, {name}!")',
+        starterCode: '# Create a greeting function\n',
+        tests: [
+            {
+                description: 'Function greet exists',
+                code: `'greet' in dir()`,
+                expected: (result, output) => result === true
+            }
         ],
-        xp: 80
+        successMessage: 'Wonderful! You\'ve created your first reusable spell!'
     },
-    
-    functions_easy_2: {
+    {
         id: 'functions_easy_2',
-        title: 'The Name Printer',
-        topic: 'functions',
+        title: '🔢 The Doubler',
         difficulty: 'easy',
-        description: 'Create a function greet_name(name) that prints "Hello, [name]!". Call it with "Python".',
-        hint: 'Functions can take parameters in parentheses',
-        extraHint: 'def greet_name(name):\\n    print(f"Hello, {name}!")\\ngreet_name("Python")',
-        example: 'def show(text):\\n    print(text)\\nshow("Test")',
-        story: 'Parameterized spells are more powerful. They adapt to any situation...',
-        testCases: [
-            { type: 'output', expected: 'Hello, Python!' }
+        topic: 'functions',
+        description: 'Create a function that returns a value.',
+        story: 'A merchant needs a quick way to double prices. Create a function that doubles any number!',
+        objective: 'Create a function called double() that takes a number and returns its double.',
+        hint: 'def double(number): return number * 2',
+        starterCode: '# Create a function that doubles a number\n',
+        tests: [
+            {
+                description: 'Function double exists',
+                code: `'double' in dir()`,
+                expected: (result, output) => result === true
+            }
         ],
-        xp: 90
+        successMessage: 'Great! Functions that return values are extremely useful!'
     },
-    
-    functions_medium_1: {
+
+    // ========== FUNCTIONS - MEDIUM ==========
+    {
         id: 'functions_medium_1',
-        title: 'The Return Master',
+        title: '📏 The Area Calculator',
+        difficulty: 'medium',
         topic: 'functions',
+        description: 'Create functions to calculate areas.',
+        story: 'Builders need to calculate areas of different shapes. Create functions to help them!',
+        objective: 'Create two functions: rectangle_area(length, width) and circle_area(radius). Use 3.14 for π.',
+        hint: 'Rectangle: length * width, Circle: π * radius²',
+        starterCode: '# Create area calculator functions\n',
+        tests: [
+            {
+                description: 'Functions exist',
+                code: `'rectangle_area' in dir() and 'circle_area' in dir()`,
+                expected: (result, output) => result === true
+            }
+        ],
+        successMessage: 'Excellent! Your functions will help builders across the kingdom!'
+    },
+    {
+        id: 'functions_medium_2',
+        title: '🎯 The Number Checker',
         difficulty: 'medium',
-        description: 'Create a function add(a, b) that returns the sum of two numbers. Call it with 5 and 3, then print the result.',
-        hint: 'Use the return keyword to send a value back',
-        extraHint: 'def add(a, b):\\n    return a + b\\nresult = add(5, 3)\\nprint(result)',
-        example: 'def multiply(x, y):\\n    return x * y\\nprint(multiply(2, 4))',
-        story: 'True power lies in return values. Functions that give back results are the most valuable...',
-        testCases: [
-            { type: 'output', expected: '8' }
+        topic: 'functions',
+        description: 'Create a function with conditional logic.',
+        story: 'Create a magical function that can determine if a number is even or odd!',
+        objective: 'Create a function is_even(number) that returns True if even, False if odd.',
+        hint: 'Use the modulo operator: number % 2 == 0',
+        starterCode: '# Create an even/odd checker function\n',
+        tests: [
+            {
+                description: 'Function is_even exists',
+                code: `'is_even' in dir()`,
+                expected: (result, output) => result === true
+            }
         ],
-        xp: 110
+        successMessage: 'Perfect! Your number checker will be very useful!'
     },
-    
-    // ===== DATA STRUCTURES =====
-    data_structures_easy_1: {
-        id: 'data_structures_easy_1',
-        title: 'The List Creator',
-        topic: 'data_structures',
+
+    // ========== FUNCTIONS - HARD ==========
+    {
+        id: 'functions_hard_1',
+        title: '🔐 The Password Validator',
+        difficulty: 'hard',
+        topic: 'functions',
+        description: 'Create a function to validate passwords.',
+        story: 'The kingdom\'s security depends on strong passwords! Create a validator that checks password strength.',
+        objective: 'Create a function validate_password(password) that checks if a password is at least 8 characters long.',
+        hint: 'Use len(password) >= 8 to check length, return True or False',
+        starterCode: '# Create a password validator\n',
+        tests: [
+            {
+                description: 'Function validate_password exists',
+                code: `'validate_password' in dir()`,
+                expected: (result, output) => result === true
+            }
+        ],
+        successMessage: 'Impressive! Your validator will protect the kingdom\'s accounts!'
+    },
+
+    // ========== DATA STRUCTURES - EASY ==========
+    {
+        id: 'data_easy_1',
+        title: '📋 The Shopping List',
         difficulty: 'easy',
-        description: 'Create a list called fruits with ["apple", "banana", "cherry"] and print it.',
-        hint: 'Lists are created with square brackets []',
-        extraHint: 'fruits = ["apple", "banana", "cherry"]\\nprint(fruits)',
-        example: 'numbers = [1, 2, 3]\\nprint(numbers)',
-        story: 'Lists are collections of power. Learn to gather and organize data...',
-        testCases: [
-            { type: 'contains', expected: ['apple', 'banana', 'cherry'] }
-        ],
-        xp: 80
-    },
-    
-    data_structures_easy_2: {
-        id: 'data_structures_easy_2',
-        title: 'The List Accessor',
         topic: 'data_structures',
+        description: 'Learn to work with lists.',
+        story: 'You need to create a shopping list for the market. Lists help organize multiple items!',
+        objective: 'Create a list called shopping_list with at least 3 items and print it.',
+        hint: 'shopping_list = ["apples", "bread", "milk"]',
+        starterCode: '# Create a shopping list\n',
+        tests: [
+            {
+                description: 'shopping_list exists and has items',
+                code: `'shopping_list' in dir() and len(shopping_list) >= 3`,
+                expected: (result, output) => result === true
+            }
+        ],
+        successMessage: 'Great! You\'ve learned to organize data with lists!'
+    },
+    {
+        id: 'data_easy_2',
+        title: '🎒 The Inventory Manager',
         difficulty: 'easy',
-        description: 'Create a list [10, 20, 30, 40, 50] and print the third element (30).',
-        hint: 'Lists are indexed starting from 0. Third element is index 2.',
-        extraHint: 'numbers = [10, 20, 30, 40, 50]\\nprint(numbers[2])',
-        example: 'items = ["a", "b", "c"]\\nprint(items[1])',
-        story: 'Access the hidden knowledge within lists. Each item has its place...',
-        testCases: [
-            { type: 'output', expected: '30' }
-        ],
-        xp: 85
-    },
-    
-    data_structures_medium_1: {
-        id: 'data_structures_medium_1',
-        title: 'The Dictionary Master',
         topic: 'data_structures',
+        description: 'Access and modify list items.',
+        story: 'Your inventory needs updating! Learn to add and access items in your list.',
+        objective: 'Create a list, add an item using append(), and print the first item using index [0].',
+        hint: 'Use list.append("item") to add, and list[0] to access first item',
+        starterCode: '# Create and manage an inventory list\ninventory = ["sword", "shield"]\n',
+        tests: [
+            {
+                description: 'List has at least 3 items',
+                code: `len(inventory) >= 3`,
+                expected: (result, output) => result === true
+            }
+        ],
+        successMessage: 'Excellent! You can now manage your inventory efficiently!'
+    },
+
+    // ========== DATA STRUCTURES - MEDIUM ==========
+    {
+        id: 'data_medium_1',
+        title: '📖 The Dictionary of Spells',
         difficulty: 'medium',
-        description: 'Create a dictionary with keys "name" and "age" with your choice of values. Print the name.',
-        hint: 'Dictionaries use curly braces {} with key:value pairs',
-        extraHint: 'person = {"name": "Alice", "age": 25}\\nprint(person["name"])',
-        example: 'data = {"city": "NYC", "population": 8000000}\\nprint(data["city"])',
-        story: 'Dictionaries map keys to values. They are the most organized form of data...',
-        testCases: [
-            { type: 'custom', check: (output) => output.trim().length > 0 }
+        topic: 'data_structures',
+        description: 'Learn to use dictionaries.',
+        story: 'Create a magical dictionary that stores spells and their effects!',
+        objective: 'Create a dictionary with at least 3 spell names as keys and their effects as values.',
+        hint: 'spells = {"fireball": "damage", "heal": "restore health"}',
+        starterCode: '# Create a spell dictionary\n',
+        tests: [
+            {
+                description: 'Dictionary spells exists with entries',
+                code: `'spells' in dir() and len(spells) >= 3`,
+                expected: (result, output) => result === true
+            }
         ],
-        xp: 130
-    }
-};
+        successMessage: 'Wonderful! Dictionaries are perfect for storing key-value pairs!'
+    },
+    {
+        id: 'data_medium_2',
+        title: '🔍 The Item Finder',
+        difficulty: 'medium',
+        topic: 'data_structures',
+        description: 'Search through lists.',
+        story: 'A merchant needs to check if certain items are in stock. Help by searching through the inventory!',
+        objective: 'Create a list of items and use the "in" operator to check if "sword" is in the list.',
+        hint: 'Use: if "sword" in items: print("Found!")',
+        starterCode: '# Create an inventory and search for an item\nitems = ["shield", "potion", "sword"]\n',
+        tests: [
+            {
+                description: 'Checks for item presence',
+                code: `None`,
+                expected: (result, output) => output.length > 0
+            }
+        ],
+        successMessage: 'Perfect! You can now search through data efficiently!'
+    },
 
-// Topic metadata
-const TOPICS = {
-    basics: {
-        name: 'Python Basics',
-        icon: '📚',
-        description: 'Learn variables, operators, and printing'
-    },
-    loops: {
-        name: 'Loops & Iteration',
-        icon: '🔄',
-        description: 'Master for and while loops'
-    },
-    functions: {
-        name: 'Functions',
-        icon: '⚡',
-        description: 'Create reusable code blocks'
-    },
-    data_structures: {
-        name: 'Data Structures',
-        icon: '📦',
-        description: 'Work with lists and dictionaries'
+    // ========== DATA STRUCTURES - HARD ==========
+    {
+        id: 'data_hard_1',
+        title: '🏆 The Leaderboard',
+        difficulty: 'hard',
+        topic: 'data_structures',
+        description: 'Work with nested data structures.',
+        story: 'Create a leaderboard system that tracks player names and scores!',
+        objective: 'Create a dictionary where keys are player names and values are their scores. Calculate the highest score.',
+        hint: 'Use max(leaderboard.values()) to find highest score',
+        starterCode: '# Create a leaderboard system\nleaderboard = {\n    "Alice": 100,\n    "Bob": 150,\n    "Charlie": 200\n}\n',
+        tests: [
+            {
+                description: 'Leaderboard exists with players',
+                code: `'leaderboard' in dir() and len(leaderboard) >= 3`,
+                expected: (result, output) => result === true
+            }
+        ],
+        successMessage: 'Outstanding! You\'ve mastered complex data structures!'
     }
-};
-
-// Story chapters based on level
-const STORY_CHAPTERS = {
-    0: {
-        title: 'The Beginning',
-        text: 'In a world where code shapes reality, you are a novice programmer who has just discovered the ancient Book of Python...'
-    },
-    5: {
-        title: 'The First Breakthrough',
-        text: 'Your fingers dance across the keyboard with growing confidence. The elders of Code Village have taken notice...'
-    },
-    10: {
-        title: 'The Loop Master',
-        text: "You've learned to harness the power of repetition. The Council of Programmers invites you to greater challenges..."
-    },
-    15: {
-        title: 'The Function Sage',
-        text: 'Your code is no longer a jumble of statements. Other programmers seek your wisdom...'
-    },
-    20: {
-        title: 'The Data Architect',
-        text: 'You now shape data like clay. You are becoming a true Python master...'
-    }
-};
-
-// Success messages
-const SUCCESS_MESSAGES = [
-    "The code compiles! Reality shifts as your program executes perfectly!",
-    "Success! Your logic is flawless and your syntax pristine!",
-    "The digital spirits smile upon your solution!",
-    "Brilliant! Your code is elegant and efficient!",
-    "The ancient Python masters would be proud!",
-    "Victory! Your programming prowess grows stronger!",
-    "Excellent work! Your solution demonstrates true understanding!",
-    "Perfect execution! The path forward opens before you!"
 ];
 
-// Get missions for a specific topic and difficulty
-function getMissionsByTopic(topic, difficulty) {
-    return Object.values(MISSIONS).filter(m => 
-        m.topic === topic && m.difficulty === difficulty
-    );
-}
-
-// Get all missions for a topic (all difficulties)
-function getAllMissionsForTopic(topic) {
-    return Object.values(MISSIONS).filter(m => m.topic === topic);
-}
-
-// Get mission by ID
-function getMission(missionId) {
-    return MISSIONS[missionId];
-}
-
-// Get random success message
-function getRandomSuccessMessage() {
-    return SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
+// Export for use in main app
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = MISSIONS;
 }

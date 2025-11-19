@@ -400,7 +400,7 @@ body {
     }
 }
 
-/* Code Editor with Syntax Highlighting */
+/* Code Editor with Syntax Highlighting - FIXED VERSION */
 .code-section {
     margin: 30px 0;
 }
@@ -443,6 +443,7 @@ body {
     position: relative;
     display: flex;
     min-height: 300px;
+    background: #1e1e1e;
 }
 
 .line-numbers {
@@ -456,12 +457,21 @@ body {
     user-select: none;
     border-right: 1px solid #3e3e42;
     min-width: 45px;
+    position: relative;
+    z-index: 1;
 }
 
+/* This is the key fix - make textarea transparent with proper layering */
 .code-editor {
-    flex: 1;
+    position: absolute;
+    top: 0;
+    left: 45px;
+    right: 0;
+    bottom: 0;
+    width: calc(100% - 45px);
     background: transparent;
-    color: #d4d4d4;
+    color: transparent;
+    caret-color: #FFFFFF;
     border: none;
     padding: 15px;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -469,31 +479,39 @@ body {
     line-height: 1.6;
     resize: vertical;
     outline: none;
-    position: relative;
-    z-index: 2;
-    caret-color: white;
+    z-index: 3;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
 }
 
+.code-editor::selection {
+    background: rgba(38, 79, 120, 0.6);
+}
+
+/* Syntax highlighted code layer underneath */
 .syntax-highlight {
     position: absolute;
     top: 0;
     left: 45px;
+    right: 0;
     padding: 15px;
     margin: 0;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     font-size: 14px;
     line-height: 1.6;
     pointer-events: none;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    z-index: 1;
-    color: transparent;
+    white-space: pre;
+    overflow-wrap: normal;
+    z-index: 2;
+    background: transparent;
+    overflow-x: auto;
 }
 
 .syntax-highlight code {
     background: transparent !important;
     padding: 0 !important;
+    font-family: inherit !important;
 }
 
 /* Prism theme customization for better visibility */
@@ -501,11 +519,11 @@ body {
 .token.prolog,
 .token.doctype,
 .token.cdata {
-    color: #6a9955;
+    color: #6a9955 !important;
 }
 
 .token.punctuation {
-    color: #d4d4d4;
+    color: #d4d4d4 !important;
 }
 
 .token.property,
@@ -515,7 +533,7 @@ body {
 .token.constant,
 .token.symbol,
 .token.deleted {
-    color: #b5cea8;
+    color: #b5cea8 !important;
 }
 
 .token.selector,
@@ -524,7 +542,7 @@ body {
 .token.char,
 .token.builtin,
 .token.inserted {
-    color: #ce9178;
+    color: #ce9178 !important;
 }
 
 .token.operator,
@@ -532,24 +550,24 @@ body {
 .token.url,
 .language-css .token.string,
 .style .token.string {
-    color: #d4d4d4;
+    color: #d4d4d4 !important;
 }
 
 .token.atrule,
 .token.attr-value,
 .token.keyword {
-    color: #c586c0;
+    color: #c586c0 !important;
 }
 
 .token.function,
 .token.class-name {
-    color: #dcdcaa;
+    color: #dcdcaa !important;
 }
 
 .token.regex,
 .token.important,
 .token.variable {
-    color: #9cdcfe;
+    color: #9cdcfe !important;
 }
 
 /* Button Group */

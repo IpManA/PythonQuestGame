@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Quest - Learn Python Through Adventure!</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Prism.js for syntax highlighting -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <!-- CodeMirror 6 - Professional code editor with syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
 </head>
 <body>
     <!-- Audio elements for sound effects -->
@@ -128,18 +129,8 @@
                         <span class="editor-title">Python Editor</span>
                         <span class="editor-language">🐍 Python</span>
                     </div>
-                    <div class="code-editor-container">
-                        <div class="line-numbers" id="lineNumbers"></div>
-                        <textarea 
-                            id="codeEditor" 
-                            class="code-editor"
-                            placeholder="# Write your Python code here...
-# Example:
-# print('Hello, World!')"
-                            spellcheck="false"
-                        ></textarea>
-                        <pre id="syntaxHighlight" class="syntax-highlight"><code class="language-python"></code></pre>
-                    </div>
+                    <!-- CodeMirror will be inserted here -->
+                    <div id="codeEditor"></div>
                 </div>
                 
                 <div class="button-group">
@@ -171,9 +162,9 @@
         </div>
     </div>
 
-    <!-- Prism.js for syntax highlighting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <!-- CodeMirror 6 with Python support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
     
     <!-- Pyodide -->
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>

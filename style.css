@@ -400,7 +400,7 @@ body {
     }
 }
 
-/* Code Editor - SIMPLIFIED APPROACH WITH VISIBLE TEXTAREA */
+/* Code Editor with CodeMirror */
 .code-section {
     margin: 30px 0;
 }
@@ -439,62 +439,70 @@ body {
     font-size: 0.9em;
 }
 
-.code-editor-container {
-    position: relative;
-    display: flex;
+/* CodeMirror Styling - Dark Theme */
+#codeEditor {
     min-height: 300px;
-    background: #1e1e1e;
 }
 
-.line-numbers {
-    background: #1e1e1e;
-    color: #858585;
-    padding: 15px 10px;
-    text-align: right;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 22.4px;
-    user-select: none;
-    border-right: 1px solid #3e3e42;
-    min-width: 50px;
-    flex-shrink: 0;
+.CodeMirror {
+    background: #1e1e1e !important;
+    color: #d4d4d4 !important;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    height: auto !important;
+    min-height: 300px !important;
 }
 
-/* Visible textarea with syntax highlighting applied */
-.code-editor {
-    flex: 1;
-    background: #1e1e1e;
-    color: #d4d4d4;
-    border: none;
-    padding: 15px;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 22.4px;
-    resize: vertical;
-    outline: none;
-    overflow: auto;
-    white-space: pre;
-    tab-size: 4;
-    -moz-tab-size: 4;
+.CodeMirror-gutters {
+    background: #1e1e1e !important;
+    border-right: 1px solid #3e3e42 !important;
 }
 
-.code-editor::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+.CodeMirror-linenumber {
+    color: #858585 !important;
 }
 
-.code-editor::-webkit-scrollbar-track {
-    background: #1e1e1e;
+.CodeMirror-cursor {
+    border-left: 2px solid #FFFFFF !important;
 }
 
-.code-editor::-webkit-scrollbar-thumb {
-    background: #464647;
-    border-radius: 5px;
+.CodeMirror-selected {
+    background: rgba(38, 79, 120, 0.6) !important;
 }
 
-/* Hide syntax highlight layer - we'll use a different approach */
-.syntax-highlight {
-    display: none;
+/* Python Syntax Colors */
+.cm-keyword {
+    color: #c586c0 !important;
+}
+
+.cm-builtin {
+    color: #4ec9b0 !important;
+}
+
+.cm-variable {
+    color: #9cdcfe !important;
+}
+
+.cm-string {
+    color: #ce9178 !important;
+}
+
+.cm-number {
+    color: #b5cea8 !important;
+}
+
+.cm-comment {
+    color: #6a9955 !important;
+    font-style: italic !important;
+}
+
+.cm-operator {
+    color: #d4d4d4 !important;
+}
+
+.cm-def {
+    color: #dcdcaa !important;
 }
 
 /* Button Group */
@@ -585,6 +593,7 @@ body {
 
 .result-box.error {
     background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    border: 2px solid #dc3545;
 }
 
 #resultContent {
@@ -707,10 +716,6 @@ body {
     .sound-toggle {
         position: static;
         margin-top: 15px;
-    }
-
-    .code-editor-container {
-        min-height: 250px;
     }
 }
 

@@ -5,244 +5,180 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Quest - Learn Python Through Adventure!</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
 </head>
 <body>
-    <!-- Particle Canvas for Effects -->
-    <canvas id="particleCanvas"></canvas>
-    
-    <!-- Main Container -->
-    <div class="container" id="app">
-        
-        <!-- Welcome Screen -->
-        <div class="screen active" id="welcomeScreen">
-            <div class="hero-section">
-                <h1 class="game-title glitch" data-text="PYTHON QUEST">PYTHON QUEST</h1>
-                <p class="subtitle">Learn Python Through Epic Adventures!</p>
-                <div class="feature-badges">
-                    <span class="badge">🎮 30+ Missions</span>
-                    <span class="badge">⚡ Real Code</span>
-                    <span class="badge">🏆 Level Up</span>
-                    <span class="badge">🎯 Free Forever</span>
+    <!-- Audio elements for sound effects -->
+    <audio id="successSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="errorSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="levelUpSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="hintSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="game-header">
+            <h1>🐍 Python Quest</h1>
+            <p class="tagline">Learn Python Through Adventure!</p>
+            <div class="sound-toggle">
+                <button id="soundToggle" class="sound-btn" title="Toggle Sound">
+                    🔊 <span id="soundStatus">ON</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mission Selection Screen -->
+        <div id="missionSelect" class="screen active">
+            <div class="profile-section">
+                <h2>Welcome, Adventurer!</h2>
+                <div class="stats-display">
+                    <div class="stat">
+                        <span class="stat-label">Level:</span>
+                        <span id="playerLevel" class="stat-value">1</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">XP:</span>
+                        <span id="playerXP" class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Missions Completed:</span>
+                        <span id="missionsCompleted" class="stat-value">0</span>
+                    </div>
                 </div>
             </div>
-            
-            <div class="menu-card">
-                <div class="profile-select">
-                    <h2>Choose Your Path</h2>
-                    <div id="profileList"></div>
-                    <button class="btn btn-primary pulse" onclick="showCreateProfile()">
-                        ⚔️ Create New Hero
+
+            <div class="difficulty-selector">
+                <h3>Select Difficulty</h3>
+                <div class="difficulty-buttons">
+                    <button class="difficulty-btn active" data-difficulty="easy">
+                        🌱 Easy
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="medium">
+                        🌿 Medium
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="hard">
+                        🌳 Hard
                     </button>
                 </div>
             </div>
+
+            <div class="topic-selector">
+                <h3>Select Topic</h3>
+                <div class="topic-buttons">
+                    <button class="topic-btn active" data-topic="basics">📝 Basics</button>
+                    <button class="topic-btn" data-topic="loops">🔁 Loops</button>
+                    <button class="topic-btn" data-topic="functions">⚙️ Functions</button>
+                    <button class="topic-btn" data-topic="data_structures">📦 Data Structures</button>
+                </div>
+            </div>
+
+            <div id="missionList" class="mission-list">
+                <!-- Missions will be populated here -->
+            </div>
+
+            <button id="resetProgress" class="reset-btn">🔄 Reset All Progress</button>
         </div>
 
-        <!-- Create Profile Screen -->
-        <div class="screen" id="createProfileScreen">
-            <div class="menu-card">
-                <h2>🎯 Create Your Hero</h2>
-                <div class="form-group">
-                    <label>Hero Name</label>
-                    <input type="text" id="heroName" placeholder="Enter your hero name" maxlength="20">
-                </div>
-                <div class="form-group">
-                    <label>Choose Your Difficulty</label>
-                    <div class="difficulty-select">
-                        <button class="difficulty-btn" data-difficulty="easy" onclick="selectDifficulty('easy')">
-                            <span class="difficulty-icon">🟢</span>
-                            <span class="difficulty-name">Easy</span>
-                            <span class="difficulty-desc">Guided tutorials</span>
-                        </button>
-                        <button class="difficulty-btn" data-difficulty="medium" onclick="selectDifficulty('medium')">
-                            <span class="difficulty-icon">🟡</span>
-                            <span class="difficulty-name">Medium</span>
-                            <span class="difficulty-desc">Standard challenges</span>
-                        </button>
-                        <button class="difficulty-btn" data-difficulty="hard" onclick="selectDifficulty('hard')">
-                            <span class="difficulty-icon">🔴</span>
-                            <span class="difficulty-name">Hard</span>
-                            <span class="difficulty-desc">Expert mode</span>
-                        </button>
-                    </div>
-                </div>
-                <button class="btn btn-primary" onclick="createProfile()">Start Adventure</button>
-                <button class="btn btn-secondary" onclick="showScreen('welcomeScreen')">Back</button>
-            </div>
-        </div>
-
-        <!-- Main Game Screen -->
-        <div class="screen" id="gameScreen">
-            <!-- Top Bar -->
-            <div class="top-bar">
-                <div class="player-info">
-                    <div class="player-name" id="playerName">Hero</div>
-                    <div class="player-stats">
-                        <div class="stat">
-                            <span class="stat-icon">⭐</span>
-                            <span class="stat-value" id="playerLevel">1</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-icon">🏆</span>
-                            <span class="stat-value" id="missionsCompleted">0</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="xp-bar-container">
-                    <div class="xp-bar" id="xpBar" style="width: 0%"></div>
-                    <span class="xp-text" id="xpText">0 / 100 XP</span>
-                </div>
-                <button class="btn btn-small" onclick="showMenu()">Menu</button>
-            </div>
-
-            <!-- Mission Screen -->
-            <div class="game-content" id="missionContent">
-                <div class="mission-card">
-                    <div class="mission-header">
-                        <h2 id="missionTitle">Mission Title</h2>
-                        <div class="mission-meta">
-                            <span class="badge" id="missionTopic">Topic</span>
-                            <span class="badge" id="missionDifficulty">Easy</span>
-                            <span class="badge" id="attemptCounter">Attempt #1</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mission-story" id="missionStory">
-                        Mission story goes here...
-                    </div>
-                    
-                    <div class="mission-description" id="missionDescription">
-                        Mission description goes here...
-                    </div>
-                    
-                    <div class="hint-section">
-                        <button class="btn btn-hint" onclick="showHint()">💡 Show Hint</button>
-                        <button class="btn btn-hint" onclick="showExtraHint()">💡💡 Show Extra Hint</button>
-                        <div class="hint-box hidden" id="hintBox"></div>
-                        <div class="hint-box hidden" id="extraHintBox"></div>
-                    </div>
-                    
-                    <div class="code-section">
-                        <div class="code-header">
-                            <h3>✍️ Your Solution</h3>
-                            <button class="btn btn-small" onclick="clearCode()">Clear</button>
-                        </div>
-                        <textarea id="codeEditor" placeholder="# Write your Python code here...
-# Press 'Run Code' when ready!"></textarea>
-                        <div class="code-actions">
-                            <button class="btn btn-primary btn-large" onclick="runCode()">
-                                🚀 Run Code
-                            </button>
-                            <button class="btn btn-secondary" onclick="skipMission()">
-                                ⏭️ Skip Mission
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="output-section hidden" id="outputSection">
-                        <h3>Output</h3>
-                        <pre id="output"></pre>
-                    </div>
+        <!-- Mission Screen -->
+        <div id="missionScreen" class="screen">
+            <button id="backToMenu" class="back-btn">← Back to Missions</button>
+            
+            <div class="mission-header">
+                <h2 id="missionTitle"></h2>
+                <div class="mission-meta">
+                    <span class="mission-difficulty" id="missionDifficulty"></span>
+                    <span class="mission-topic" id="missionTopic"></span>
                 </div>
             </div>
 
-            <!-- Menu Overlay -->
-            <div class="menu-overlay hidden" id="menuOverlay">
-                <div class="menu-card">
-                    <h2>Menu</h2>
-                    <button class="btn btn-primary" onclick="showTopics()">📚 Select Topic</button>
-                    <button class="btn btn-primary" onclick="showProgress()">📊 View Progress</button>
-                    <button class="btn btn-primary" onclick="changeDifficulty()">🎯 Change Difficulty</button>
-                    <button class="btn btn-secondary" onclick="closeMenu()">Continue Mission</button>
-                    <button class="btn btn-danger" onclick="logout()">Logout</button>
+            <div class="story-section">
+                <div class="story-box">
+                    <h3>📖 Story</h3>
+                    <p id="missionStory"></p>
                 </div>
             </div>
-        </div>
 
-        <!-- Topics Selection Screen -->
-        <div class="screen" id="topicsScreen">
-            <div class="menu-card">
-                <h2>📚 Select Topic</h2>
-                <div class="topics-grid" id="topicsList">
-                    <!-- Topics will be populated by JS -->
+            <div class="objective-section">
+                <h3>🎯 Objective</h3>
+                <p id="missionObjective"></p>
+            </div>
+
+            <div class="hint-section">
+                <button id="showHint" class="hint-btn">💡 Show Hint</button>
+                <div id="hintBox" class="hint-box hidden">
+                    <p id="hintText"></p>
                 </div>
-                <button class="btn btn-secondary" onclick="returnToGame()">Back</button>
             </div>
-        </div>
 
-        <!-- Progress Screen -->
-        <div class="screen" id="progressScreen">
-            <div class="menu-card">
-                <h2>📊 Your Progress</h2>
-                <div id="progressDetails"></div>
-                <button class="btn btn-secondary" onclick="returnToGame()">Back</button>
+            <div class="code-section">
+                <h3>✍️ Your Code</h3>
+                <div class="editor-wrapper">
+                    <div class="editor-header">
+                        <span class="editor-title">Python Editor</span>
+                        <span class="editor-language">🐍 Python</span>
+                    </div>
+                    <div class="code-editor-container">
+                        <div class="line-numbers" id="lineNumbers"></div>
+                        <textarea 
+                            id="codeEditor" 
+                            class="code-editor"
+                            placeholder="# Write your Python code here...
+# Example:
+# print('Hello, World!')"
+                            spellcheck="false"
+                        ></textarea>
+                        <pre id="syntaxHighlight" class="syntax-highlight"><code class="language-python"></code></pre>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="runCode" class="run-btn">▶️ Run Code</button>
+                    <button id="clearCode" class="clear-btn">🗑️ Clear</button>
+                </div>
             </div>
-        </div>
 
-    </div>
+            <div class="output-section">
+                <h3>📤 Output</h3>
+                <pre id="output" class="output-box"></pre>
+            </div>
 
-    <!-- Success Modal -->
-    <div class="modal hidden" id="successModal">
-        <div class="modal-content success">
-            <div class="success-animation">
-                <div class="trophy-icon">🏆</div>
-                <h2>MISSION COMPLETE!</h2>
+            <div id="resultBox" class="result-box hidden">
+                <div id="resultContent"></div>
             </div>
-            <div class="success-details">
-                <p class="success-message" id="successMessage"></p>
-                <div class="xp-gain" id="xpGain"></div>
-                <div class="achievement-badges" id="achievementBadges"></div>
-            </div>
-            <button class="btn btn-primary btn-large pulse" onclick="nextMission()">
-                Next Mission ➔
-            </button>
         </div>
     </div>
 
-    <!-- Level Up Modal -->
-    <div class="modal hidden" id="levelUpModal">
-        <div class="modal-content levelup">
-            <div class="levelup-animation">
-                <div class="level-icon">⭐</div>
-                <h2>LEVEL UP!</h2>
-            </div>
-            <div class="level-details">
-                <p class="level-text">You are now Level <span id="newLevel"></span>!</p>
-                <p class="level-subtext">Your Python powers grow stronger!</p>
-            </div>
-            <button class="btn btn-primary" onclick="closeLevelUp()">Awesome!</button>
+    <!-- Confetti canvas -->
+    <canvas id="confetti"></canvas>
+
+    <!-- Loading indicator for Python -->
+    <div id="loadingPython" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading Python...</p>
+            <p class="loading-subtext">This may take a few seconds</p>
         </div>
     </div>
 
-    <!-- Error Modal -->
-    <div class="modal hidden" id="errorModal">
-        <div class="modal-content error">
-            <h2>❌ Not Quite Right</h2>
-            <p class="error-message" id="errorMessage"></p>
-            <div class="error-details" id="errorDetails"></div>
-            <div class="encouragement">
-                <p>💪 Don't give up! You can try again!</p>
-                <p>🎯 Unlimited retries available!</p>
-            </div>
-            <button class="btn btn-primary btn-large" onclick="closeError()">
-                Try Again
-            </button>
-            <button class="btn btn-secondary" onclick="giveUpMission()">
-                Give Up (for now)
-            </button>
-        </div>
-    </div>
-
-    <!-- Loading Screen -->
-    <div class="loading-overlay hidden" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <p>Loading Python Engine...</p>
-    </div>
-
-    <!-- Scripts -->
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    
+    <!-- Game scripts -->
     <script src="missions.js"></script>
     <script src="app.js"></script>
 </body>
